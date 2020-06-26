@@ -1,5 +1,7 @@
 flask
 flask-sqlalchemy
-mysqlclient
 flask-script
 flask_debugtoolbar
+
+# requries `sudo yum install python3-devel mysql-devel` (on CentOS7
+mysqlclient
