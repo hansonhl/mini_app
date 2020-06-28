@@ -53,6 +53,9 @@ def edit():
         if "current_user" not in g or g.current_user is None:
             return json_error_response("您还没有登录，不能更改个人信息!")
 
+        if len(nickname) < 1 or len(email) < 1:
+            return json_error_response("您的姓名或邮箱不能为空!")
+
         user_info = g.current_user
         user_info.nickname = nickname
         user_info.email = email
@@ -65,7 +68,31 @@ def edit():
 
 
 
-@user_blueprint.route("/reset_pwd")
+@user_blueprint.route("/reset_pwd", methods=["POST", "GET"])
 def reset_pwd():
-    return render_template_with_global_vars("user/reset_pwd.html")
+    if request.method == "GET":
+        return render_template_with_global_vars("user/reset_pwd.html")
+    elif request.method == "POST":
+        old_pwd = request.form["old_pwd"] if "old_pwd" in request.form else ""
+        new_pwd = request.form["new_pwd"] if "new_pwd" in request.form else ""
+
+        if len(old_pwd) < 1 or len(new_pwd) < 1:
+            return json_error_response("您输入的密码不能为空!")
+
+        if "current_user" not in g or g.current_user is None:
+            return json_error_response("您还没有登录，不能更改个人信息!")
+
+        # check old password
+        user_info = g.current_user
+        if generate_salted_pwd(old_pwd, user_info.login_salt) != user_info.login_pwd:
+            return json_error_response("您输入的旧密码不正确!")
+
+        user_info.login_pwd = generate_salted_pwd(new_pwd, user_info.login_salt)
+        db.session.add(user_info)
+        db.session.commit()
+
+        response = json_response(msg="修改密码成功!")
+        response.set_cookie(app.config["AUTH_COOKIE_NAME"], generate_cookie(user_info))
+        return response
+
 

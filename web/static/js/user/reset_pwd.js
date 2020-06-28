@@ -5,7 +5,7 @@ var user_reset_pwd_ops = {
         this.eventBind();
     },
     eventBind: function () {
-        $("div.user_edit_wrapper button.save").click(function () {
+        $("div.user_reset_pwd_wrapper button#save").click(function () {
             var btn_element = $(this);
             if (btn_element.hasClass("disabled")) {
                 common_ops.alert("Please wait for server to respond");
@@ -42,7 +42,6 @@ var user_reset_pwd_ops = {
 
             btn_element.addClass("disabled");
 
-            // the following is not done yet
             $.ajax({
                 url: common_ops.buildUrl("/user/reset_pwd"),
                 type: "POST",
@@ -50,10 +49,12 @@ var user_reset_pwd_ops = {
                 dataType: "json",
                 success: function (res) {
                     btn_element.removeClass("disabled");
-                    // TODO
+                    old_pwd_element.val("");
+                    new_pwd_element.val("");
+                    confirm_pwd_element.val("");
                     common_ops.alert(res.msg);
                 }
-            })
+            });
         });
     }
 }
