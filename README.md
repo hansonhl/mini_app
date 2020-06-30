@@ -30,3 +30,4 @@ All backend python code is in `controllers/user/user.py`
 - Login (`templates/user/login.html`, `static/js/user/login.js`)
 - Edit account info (`templates/user/edit.html`, `static/js/user/edit.js`)
 - Reset password (`templates/user/reset_pwd.html`, `static/js/user/reset_pwd.js`)
+

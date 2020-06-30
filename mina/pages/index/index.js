@@ -37,5 +37,43 @@ Page({
         });
       }
     });
+  },
+  // This login fxn is bound with "button.confirm-btn" in pages/index/index.wxml
+  login: function (e) {
+    // obtain very basic user info. This info cannot be used to actually login a user
+    if (!e.detail.userInfo) {
+      // app.alert() is a helper fxn def'd in app.js, provided by imooc instructor
+      app.alert({"content":"登录失败，请再试"});
+      return;
+    }
+    var data = e.detail.userInfo;
+
+    wx.login({
+      success: function (res) {
+        if (!res.code) {
+          // app.alert() is a helper fxn def'd in app.js, provided by imooc instructor
+          app.alert({"content": "登录失败，请再试"});
+          return;
+        }
+        // obtain login code
+        data['login_code'] = res.code;
+        // send request to server backend
+        // 勾选 设置->项目设置->不校验合法域名..., 以下request才可以使用
+        wx.request({
+          url: 'http://192.168.1.171:5000/api/member/login',
+          method: 'POST',
+          data: data,
+          // 自定义header, getRequestHeader() is defined in app.js, provided by imooc instructor
+          // This allows `data` to be processed as a normal html json form
+          header: app.getRequestHeader(),
+          success: function (res) {
+    
+          }
+        });
+      }
+    });
+
+   
+    
   }
 });

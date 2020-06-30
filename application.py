@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_debugtoolbar import DebugToolbarExtension
-import os
+import os, json
 
 class Application(Flask):
     def __init__(self, import_name, template_folder="", static_folder=""):
@@ -21,6 +21,10 @@ class Application(Flask):
                 self.logger.error("The environment specified is invalid! Using dev by default. Must be one of: dev | demo | prod")
 
         self.config.from_pyfile("config/%s_setting.py" % self.environ)
+
+        # load secret keys
+        self.config.from_pyfile(self.config["SECRET_FILE"])
+
 
 
 
