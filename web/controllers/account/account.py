@@ -1,4 +1,5 @@
 from flask import Blueprint, request, make_response, redirect
+from sqlalchemy import or_
 
 from application import app, db
 
@@ -12,11 +13,19 @@ account_blueprint = Blueprint("account", __name__)
 
 @account_blueprint.route("/index")
 def index():
-    current_page = int(request.args["p"]) if "p" in request.args else 1
+    current_page = int(request.args.get("p", "1"))
     users_per_page = app.config["ACCOUNT_INDEX_USERS_PER_PAGE"]
-    offset = (current_page - 1) * users_per_page
 
     user_info_query = User.query
+
+    values = request.values
+    if "mix_kw" in values and len(values["mix_kw"]) > 0:
+        app.logger.debug("mix_kw %s" % values["mix_kw"])
+        rule = or_(User.nickname.ilike("%%%s%%" % values["mix_kw"]),
+                   User.mobile.ilike("%%%s%%" % values["mix_kw"]))
+        user_info_query = user_info_query.filter(rule)
+
+    offset = (current_page - 1) * users_per_page
 
     pagination_dict = pagination(num_items=user_info_query.count(),
                                  items_per_page=users_per_page,
@@ -25,7 +34,11 @@ def index():
 
     user_info_list = user_info_query[offset:offset+users_per_page]
 
-    page_params = {"user_info_list": user_info_list, "pagination": pagination_dict}
+    page_params = {"user_info_list": user_info_list,
+                   "pagination": pagination_dict,
+                   "search": {"mix_kw": values.get("mix_kw", None),
+                              "status": values.get("status", "-1")},
+                   "status_mapping": app.config["ACCOUNT_STATUS_MAPPING"]}
     return render_template_with_global_vars("account/index.html", context=page_params)
 
 @account_blueprint.route("/info")
@@ -57,7 +70,7 @@ def set():
         nickname = request.form["nickname"] if "nickname" in request.form else ""
         mobile = request.form["mobile"] if "mobile" in request.form else ""
         email = request.form["email"] if "email" in request.form else ""
-        app.logger.debug("setting info for uid %d, new username %s" % (uid, username))
+        app.logger.debug("setting info for uid %d, new username %s, pwd %s" % (uid, username, pwd))
 
         if len(nickname) < 1 or len(email) < 1 or len(mobile) < 1:
             empty_items = []
@@ -73,7 +86,7 @@ def set():
                 empty_items.append("登录密码")
 
             msg = "以下内容不能为空：" + "、".join(empty_items)
-            return json_error_response(msg=msg)
+            return json_error_response(msg)
 
         if len(pwd) < 6 and uid == 0:
             return json_error_response("您的密码不能短于6个字符！")
@@ -97,15 +110,38 @@ def set():
         user_info.email = email
 
         # edit password when it is not default value "*****" (see set.html)
-        if pwd != "*****":
-            user_info.pwd = generate_salted_pwd(pwd, user_info.login_salt)
+        if pwd != default_pwd:
+            user_info.login_pwd = generate_salted_pwd(pwd, user_info.login_salt)
 
         db.session.add(user_info)
         db.session.commit()
 
-        if new_user:
-            app.logger.debug("Edited user %s" % username)
-        else:
-            app.logger.debug("Created new user %s" % username)
+        return json_response("账号个人信息编辑成功!", data={})
 
-        return json_response(msg="账号个人信息编辑成功!", data={})
+@account_blueprint.route("/ops", methods=["POST"])
+def ops():
+    values = request.values
+    if "act" not in values or "uid" not in values:
+        return json_error_response("无效的账号编辑操作")
+
+    user_info = User.query.filter_by(uid=values["uid"]).first()
+
+    if not user_info:
+        return json_error_response("无效的账号编辑操作")
+
+    if values["act"] == "remove":
+        user_info.status = 0
+        success_msg = "成功移除 %s 的账户 (登录名 %s)" % (user_info.nickname, user_info.login_name)
+    elif values["act"] == "recover":
+        success_msg = "成功恢复 %s 的账户 (登录名 %s)" % (user_info.nickname, user_info.login_name)
+        user_info.status = 1
+    else:
+        return json_error_response("无效的账号编辑操作")
+
+    user_info.update_time = get_current_time()
+
+    db.session.add(user_info)
+    db.session.commit()
+
+    return json_response(success_msg)
+

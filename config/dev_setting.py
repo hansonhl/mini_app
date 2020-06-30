@@ -1,3 +1,3 @@
 DEBUG = True
 
-SQLALCHEMY_ECHO = True
+SQLALCHEMY_ECHO = False

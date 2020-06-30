@@ -17,3 +17,8 @@ IGNORE_COOKIE_AUTH_URLS = [
 ] # use regexp
 
 ACCOUNT_INDEX_USERS_PER_PAGE = 30
+
+ACCOUNT_STATUS_MAPPING = {
+    "1": "正常",
+    "0": "已删除"
+}

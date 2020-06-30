@@ -10,12 +10,12 @@ def render_template_with_global_vars(template, context={}):
         context["current_user"] = g.current_user
     return render_template(template, **context)
 
-def json_response(code=200, msg="Success!", data={}):
-    res = {"code": code, "msg": msg, "data": data}
+def json_response(msg="Success!", code=200, data={}):
+    res = {"msg": msg, "code": code, "data": data}
     return make_response(jsonify(res))
 
 def json_error_response(msg="An error occurred", data={}):
-    return json_response(code=-1, msg=msg, data=data)
+    return json_response(msg=msg, code=-1, data=data)
 
 def pagination(num_items, items_per_page, current_page, url):
     num_pages = max(1, math.ceil(num_items / items_per_page))

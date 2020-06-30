@@ -5,34 +5,59 @@ var account_index_ops = {
         this.eventBind();
     },
     eventBind: function () {
-        $("div.account_set_wrapper button.save").click(function () {
-            var btn_element = $(this);
-            if (btn_element.hasClass("disabled")) {
-                common_ops.alert("Please wait for server to respond");
-                return;
-            }
+        var that = this;
+        $("form.search_wrapper button.search").click(function () {
+            $("form.search_wrapper").submit();
+            console.log("sent result");
+        });
+        $("table a.remove").click(function () {
+            //
+            var nickname = $(this).parent().siblings("td.nickname").text();
 
+            // attr(): obtain info stored in an html element attribute
+            var uid = $(this).attr("data");
 
-
-            btn_element.addClass("disabled");
-
-            $.ajax({
-                url: common_ops.buildUrl("/account/set"),
+            // that: use that here because "this" in the scope of the function has changed
+            that.ops("remove", {uid: uid, nickname: nickname});
+        });
+        $("table a.recover").click(function () {
+            var nickname = $(this).parent().siblings("td.nickname").text();
+            var uid = $(this).attr("data");
+            that.ops("recover", {uid: uid, nickname: nickname});
+        });
+    },
+    ops: function (act, args) {
+        var callback = {
+            "ok": function () {
+                $.ajax({
+                url: common_ops.buildUrl("/account/ops"),
                 type: "POST",
                 data: {
-
+                    act: act,
+                    uid: args.uid,
                 },
                 dataType: "json",
                 success: function (res) {
-                    btn_element.removeClass("disabled");
                     var callback_fxn = null;
                     if (res.code == 200) {
-
+                        callback_fxn = function () {
+                            window.location.reload();
+                        }
                     }
                     common_ops.alert(res.msg, callback_fxn);
                 }
             })
-        });
+            },
+            "cancel": null
+        };
+        var confirm_msg = ""
+        if (act === "remove") {
+            confirm_msg = "确定移除 " + args.nickname + " 的账户？";
+        } else {
+            confirm_msg = "确定恢复 " + args.nickname + " 的账户？";
+        }
+        common_ops.confirm(confirm_msg, callback)
+
     }
 }
 

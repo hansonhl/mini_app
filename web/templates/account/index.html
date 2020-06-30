@@ -1,16 +1,6 @@
 {% extends "common/layout_main.html" %}
 {% block content %}
-<div class="row  border-bottom">
-    <div class="col-lg-12">
-        <div class="tab_title">
-            <ul class="nav nav-pills">
-                <li class="current">
-                    <a href="{{ buildUrl('/account/index') }}">账户列表</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
+{% include "common/account.html" %}
 <div class="row">
     <div class="col-lg-12">
         <form class="form-inline search_wrapper">
@@ -18,14 +8,15 @@
                 <div class="form-group">
                     <select name="status" class="form-control inline">
                         <option value="-1">请选择状态</option>
-                        <option value="1">正常</option>
-                        <option value="0">已删除</option>
+                        {% for key in status_mapping %}
+                        <option %} if key == search.status selected value="{{key}}" {% {%endif%}} >{{status_mapping[key]}}</option>
+                        {% endfor %}
                     </select>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
-                        <input type="text" name="mix_kw" placeholder="请输入姓名或者手机号码" class="form-control" value="">
+                        <input class="form-control" name="mix_kw" placeholder="请输入姓名或者手机号码" type="text" value="{{search.mix_kw}}">
                         <input type="hidden" name="p" value="1">
                         <span class="input-group-btn">
                             <button type="button" class="btn btn-primary search">
@@ -58,21 +49,27 @@
             <tbody>
             {% for user in user_info_list %}
             <tr>
-                <td>{{user.uid}}</td>
-                <td>{{user.nickname}}</td>
+                <td class="uid">{{user.uid}}</td>
+                <td class="nickname">{{user.nickname}}</td>
                 <td>{{user.mobile}}</td>
                 <td>{{user.email}}</td>
                 <td>
                     <a href="{{ '%s?uid=%s' | format(buildUrl('/account/info'), user.uid) }}">
                         <i class="fa fa-eye fa-lg"></i>
                     </a>
+                    {% if user.status == 1 %}
                     <a class="m-l" href="{{'%s?uid=%s' | format(buildUrl('/account/set'), user.uid)}}">
                         <i class="fa fa-edit fa-lg"></i>
                     </a>
-
-                    <a class="m-l remove" href="javascript:void(0);">
+                    <!--"data" attribute: associate data to a element that can be retrieved by jquery code-->
+                    <a class="m-l remove" data="{{user.uid}}" href="javascript:void(0);">
                         <i class="fa fa-trash fa-lg"></i>
                     </a>
+                    {% else %}
+                    <a class="m-l recover" data="{{user.uid}}" href="javascript:void(0);">
+                        <i class="fa fa-rotate-left fa-lg"></i>
+                    </a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -83,4 +80,8 @@
         {% include "common/pagination.html" %}
     </div>
 </div>
+{% endblock %}
+
+{% block js %}
+<script src="{{ buildStaticUrl('/js/account/index.js') }}"></script>
 {% endblock %}
