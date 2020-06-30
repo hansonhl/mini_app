@@ -13,7 +13,7 @@
             </li>
             {% endif %}
             {% for idx in pagination.range %}
-            <li %} %} class="active" endif idx == if pagination.current_page {% {%>
+            <li {% if idx == pagination.current_page %} class="active" {% endif %}>
                 <a href="{{pagination.url}}&p={{idx}}">{{idx}}</a>
             </li>
             {% endfor %}

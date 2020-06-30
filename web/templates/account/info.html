@@ -35,6 +35,9 @@
                             </ul>
                         </div>
                     </div>
+                    <div class="panel-info" style="padding-top: 10px">
+                         显示最新 {{num_entries}} 条记录
+                    </div>
                     <div class="panel-body">
                         <div class="tab-content">
                             <div class="tab-pane active">
@@ -46,7 +49,18 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-									<tr><td colspan="2">暂无数据</td></tr>
+                                    {% if not access_log %}
+									<tr>
+                                        <td colspan="2">暂无数据</td>
+                                    </tr>
+                                    {% else %}
+                                    {% for entry in access_log %}
+                                    <tr>
+                                        <td>{{ entry.created_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                        <td>{{ entry.target_url }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% endif %}
                                      </tbody>
                                 </table>
                             </div>

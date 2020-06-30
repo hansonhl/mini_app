@@ -5,3 +5,4 @@ flask-sqlacodegen \
   --tables $1 \
   --outfile "common/models/$1.py" \
   --flask
+echo "Successfully created python code for ORM model!"

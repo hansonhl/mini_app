@@ -9,14 +9,14 @@
                     <select name="status" class="form-control inline">
                         <option value="-1">请选择状态</option>
                         {% for key in status_mapping %}
-                        <option %} if key == search.status selected value="{{key}}" {% {%endif%}} >{{status_mapping[key]}}</option>
+                        <option value="{{key}}" {% if key == search.status %} selected {%endif%}} >{{status_mapping[key]}}</option>
                         {% endfor %}
                     </select>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
-                        <input class="form-control" name="mix_kw" placeholder="请输入姓名或者手机号码" type="text" value="{{search.mix_kw}}">
+                        <input type="text" name="mix_kw" placeholder="请输入姓名或者手机号码" class="form-control" value="{{search.mix_kw}}">
                         <input type="hidden" name="p" value="1">
                         <span class="input-group-btn">
                             <button type="button" class="btn btn-primary search">
@@ -41,6 +41,7 @@
             <tr>
                 <th>序号</th>
                 <th>姓名</th>
+                <th>登录名</th>
                 <th>手机</th>
                 <th>邮箱</th>
                 <th>操作</th>
@@ -51,6 +52,7 @@
             <tr>
                 <td class="uid">{{user.uid}}</td>
                 <td class="nickname">{{user.nickname}}</td>
+                <td class="login_name">{{user.login_name}}</td>
                 <td>{{user.mobile}}</td>
                 <td>{{user.email}}</td>
                 <td>
@@ -62,11 +64,11 @@
                         <i class="fa fa-edit fa-lg"></i>
                     </a>
                     <!--"data" attribute: associate data to a element that can be retrieved by jquery code-->
-                    <a class="m-l remove" data="{{user.uid}}" href="javascript:void(0);">
+                    <a class="m-l remove" href="javascript:void(0);" data="{{user.uid}}">
                         <i class="fa fa-trash fa-lg"></i>
                     </a>
                     {% else %}
-                    <a class="m-l recover" data="{{user.uid}}" href="javascript:void(0);">
+                    <a class="m-l recover" href="javascript:void(0);" data="{{user.uid}}">
                         <i class="fa fa-rotate-left fa-lg"></i>
                     </a>
                     {% endif %}
