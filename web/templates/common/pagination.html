@@ -1,0 +1,29 @@
+<div class="row">
+    <div class="col-lg-12">
+        <span class="pagination_count" style="line-height: 40px;">
+            共 {{pagination.num_items}} 条记录 | 每页 {{pagination.items_per_page}} 条
+        </span>
+
+        <ul class="pagination pagination-lg pull-right" style="margin: 0 0 ;">
+            {% if pagination.has_prev %}
+            <li>
+                <a aria-label="Previous" href="{{pagination.url}}&p={{pagination.current_page - 1}}">
+                    <span aria-hidden="true">上一页</span>
+                </a>
+            </li>
+            {% endif %}
+            {% for idx in pagination.range %}
+            <li %} %} class="active" endif idx if pagination.current_page == {% {%>
+                <a href="{{pagination.url}}&p={{idx}}">{{idx}}</a>
+            </li>
+            {% endfor %}
+            {% if pagination.has_next %}
+            <li>
+                <a aria-label="Next" href="{{pagination.url}}&p={{pagination.current_page + 1}}">
+                    <span aria-hidden="true">下一页</span>
+                </a>
+            </li>
+            {% endif%}
+        </ul>
+    </div>
+</div>

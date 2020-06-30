@@ -28,8 +28,8 @@ var user_reset_pwd_ops = {
                 common_ops.alert("请输入新密码!");
                 return;
             }
-            if (confirm_pwd.length < 1) {
-                common_ops.alert("请确认新密码!");
+            if (confirm_pwd.length < 6) {
+                common_ops.alert("您的密码不能短于6个字符!");
                 return;
             }
             if (new_pwd != confirm_pwd) {

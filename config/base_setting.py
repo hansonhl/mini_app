@@ -15,3 +15,5 @@ IGNORE_COOKIE_AUTH_URLS = [
     "^/static",
     "^/favicon.ico"
 ] # use regexp
+
+ACCOUNT_INDEX_USERS_PER_PAGE = 30
