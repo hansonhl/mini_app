@@ -1,5 +1,6 @@
 import json
 from common.models.app_access_log import AppAccessLog
+from common.models.app_error_log import AppErrorLog
 from common.libs.utils import get_current_time
 
 from application import app, db
@@ -22,5 +23,13 @@ def add_access_log(request, g):
     return True
 
 
-def add_error_log():
-    pass
+def add_error_log(msg, request):
+    entry = AppErrorLog()
+    entry.target_url = request.url
+    entry.referer_url = request.referrer
+    entry.query_params = json.dumps(request.values.to_dict())
+    entry.content = msg
+    entry.created_time = get_current_time()
+    db.session.add(entry)
+    db.session.commit()
+    return True

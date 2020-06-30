@@ -10,7 +10,7 @@ from web.controllers.finance.finance import finance_blueprint
 from web.controllers.stat.stat import stat_blueprint
 
 from web.interceptors.auth import *
-from web.interceptors.errorhandlers import *
+from web.interceptors.error import *
 
 
 # register python function as part of html template rendering
