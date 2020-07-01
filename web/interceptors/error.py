@@ -1,7 +1,7 @@
 from application import app
 from flask import request
 from common.libs.utils import render_template_with_global_vars
-from common.libs.log_service import add_error_log
+from common.libs.log_utils import add_error_log
 
 @app.errorhandler(404)
 def error_404(e):

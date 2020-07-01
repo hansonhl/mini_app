@@ -5,7 +5,7 @@ from application import app
 from common.models.user import User
 from common.libs.user_utils import generate_auth_code
 from common.libs.url_manager import build_url
-from common.libs.log_service import *
+from common.libs.log_utils import *
 
 
 @app.before_request

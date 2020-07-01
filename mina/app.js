@@ -6,7 +6,7 @@ App({
         userInfo: null,
         version: "1.0",
         shopName: "Python3 + Flask 订餐全栈系统",
-        domain:"http://192.168.0.119:8999/api"
+        domain:"http://192.168.1.171:5000/api"
     },
     tip:function( params ){
         var that = this;
@@ -56,5 +56,37 @@ App({
         return {
             'content-type': 'application/x-www-form-urlencoded'
         }
+    },
+    buildUrl: function(path, params) {
+        //params = { "test":"abc","sort":"asc" };
+        // ?test=abc&sort=asc
+        var url = this.globalData.domain + path;
+        var _param_url = "";
+        if( params ) {
+            _param_url = Object.keys(params).map(function (k) {
+                return [ encodeURIComponent(k),encodeURIComponent( params[k] ) ].join("=")
+            }).join("&");
+            _param_url = "?" + _param_url;
+        }
+        return url + _param_url;
+    },
+    getCache: function(key) {
+        // wechat fxns to manipulate key-value pairs locally
+        var value = null;
+        try {
+            value = wx.getStorageSync({
+                key: key
+              });
+        } catch (e) {
+
+        }
+        return value;
+        
+    },
+    setCache: function(key, value) {
+        wx.setStorage({
+          data: value,
+          key: key
+        });
     }
 });
