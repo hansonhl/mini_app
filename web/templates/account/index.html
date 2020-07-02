@@ -5,15 +5,7 @@
     <div class="col-lg-12">
         <form class="form-inline search_wrapper">
             <div class="row m-t p-w-m">
-                <div class="form-group">
-                    <select name="status" class="form-control inline">
-                        <option value="-1">请选择状态</option>
-                        {% for key in status_mapping %}
-                        <option value="{{key}}" {% if key == search.status %} selected {%endif%}} >{{status_mapping[key]}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
+                {% include "common/status_filter.html" %}
                 <div class="form-group">
                     <div class="input-group">
                         <input type="text" name="mix_kw" placeholder="请输入姓名或者手机号码" class="form-control"

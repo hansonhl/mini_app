@@ -1,0 +1,8 @@
+<div class="form-group">
+    <select name="status" class="form-control inline">
+        <option value="-1">所有状态</option>
+        {% for key in status_mapping %}
+        <option value="{{key}}" {% if key == search.status %} selected {%endif%}} >{{status_mapping[key]}}</option>
+        {% endfor %}
+    </select>
+</div>

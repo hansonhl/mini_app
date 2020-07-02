@@ -14,11 +14,11 @@ How to run server in development mode
 
 ## Project Structure
 
-
 ### Admin Account management 
 All backend python code is in `controllers/account/account.py`
 
-- List all accounts using pagination (`templates/account/index.html`, `static/js/account/index.js`)
+- List all accounts using pagination (`templates/account/index.html`, `static/js/account/index.js`), search member by name
+    status and/or cellphone number
 - List detailed account info and access log (`templates/account/info.html`)
 - Adding and editing accounts (`templates/account/set.html`, `static/js/account/set.js`): functions are integrated together
 - Deleting and recovering accounts (`templates/account/index.html`, `static/js/account/index.js`)
@@ -29,6 +29,17 @@ All backend python code is in `controllers/user/user.py`, some helper functions 
 - Login (`templates/user/login.html`, `static/js/user/login.js`)
 - Edit account info (`templates/user/edit.html`, `static/js/user/edit.js`)
 - Reset password (`templates/user/reset_pwd.html`, `static/js/user/reset_pwd.js`)
+
+### Client-side member management
+All backend python code is in `controllers/members/member.py`
+A new member is created whenever a new account logs in through the WeChat miniapp front end. No function to create a 
+new member.
+
+- List all members (`templates/member/index.html`, `static/js/member/index.js`), search member by name and/or status
+- List detailed member info (`templates/member/info.html`)
+- Editing members (`templates/member/set.html`, `static/js/member/set.js`)
+- Deleting and recovering accounts (`templates/member/index.html`, `static/js/member/index.js`)
+
 
 ### Wechat login
 

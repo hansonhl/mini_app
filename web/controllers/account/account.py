@@ -18,7 +18,7 @@ def index():
     values = request.values
     users_per_page = app.config["MEMBER_INDEX_ITEMS_PER_PAGE"]
 
-    user_info_query = User.query
+    user_info_query = User.query.order_by(User.status.desc(), User.uid.desc())
 
     # filtering by search
     if "mix_kw" in values and len(values["mix_kw"]) > 0:
@@ -118,6 +118,7 @@ def set():
         user_info.nickname = nickname
         user_info.mobile = mobile
         user_info.email = email
+        user_info.updated_time = get_current_time()
 
         # edit password when it is not default value "*****" (see set.html)
         if pwd != default_pwd:

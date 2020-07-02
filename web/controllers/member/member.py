@@ -17,14 +17,14 @@ def index():
     values = request.values
     items_per_page = app.config["ACCOUNT_INDEX_ITEMS_PER_PAGE"]
 
-    member_info_query = Member.query
+    member_info_query = Member.query.order_by(Member.status.desc(), Member.id.desc())
     app.logger.debug("number of members: %d" % member_info_query.count())
     # filtering by search
     if "mix_kw" in values and len(values["mix_kw"]) > 0:
         app.logger.debug("mix_kw %s" % values["mix_kw"])
         rule = or_(Member.nickname.ilike("%%%s%%" % values["mix_kw"]),
                    Member.mobile.ilike("%%%s%%" % values["mix_kw"]))
-        member_info_query = member_info_query.order_by(Member.id.desc()).filter(rule)
+        member_info_query = member_info_query.filter(rule)
 
     if "status" in values:
         if values["status"] != "-1":
@@ -83,6 +83,7 @@ def set():
             return json_error_response("会员名称不能为空！")
 
         member_info.nickname = new_nickname
+        member_info.update_time = get_current_time()
         db.session.add(member_info)
         db.session.commit()
         return json_response("修改会员信息成功！")
