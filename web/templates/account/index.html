@@ -16,7 +16,8 @@
 
                 <div class="form-group">
                     <div class="input-group">
-                        <input type="text" name="mix_kw" placeholder="请输入姓名或者手机号码" class="form-control" value="{{search.mix_kw}}">
+                        <input type="text" name="mix_kw" placeholder="请输入姓名或者手机号码" class="form-control"
+                               value="{% if search.mix_kw %}{{search.mix_kw}}{% endif %}">
                         <input type="hidden" name="p" value="1">
                         <span class="input-group-btn">
                             <button type="button" class="btn btn-primary search">

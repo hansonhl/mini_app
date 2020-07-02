@@ -16,7 +16,7 @@ account_blueprint = Blueprint("account", __name__)
 def index():
     current_page = int(request.args.get("p", "1"))
     values = request.values
-    users_per_page = app.config["ACCOUNT_INDEX_USERS_PER_PAGE"]
+    users_per_page = app.config["MEMBER_INDEX_ITEMS_PER_PAGE"]
 
     user_info_query = User.query
 

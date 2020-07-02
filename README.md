@@ -14,9 +14,8 @@ How to run server in development mode
 
 ## Project Structure
 
-### Admin end
 
-#### Admin Account management 
+### Admin Account management 
 All backend python code is in `controllers/account/account.py`
 
 - List all accounts using pagination (`templates/account/index.html`, `static/js/account/index.js`)
@@ -24,14 +23,14 @@ All backend python code is in `controllers/account/account.py`
 - Adding and editing accounts (`templates/account/set.html`, `static/js/account/set.js`): functions are integrated together
 - Deleting and recovering accounts (`templates/account/index.html`, `static/js/account/index.js`)
 
-#### Credentials and authentication
+### Credentials and authentication
 All backend python code is in `controllers/user/user.py`, some helper functions defined in `common/libs/user_utils.py`
 
 - Login (`templates/user/login.html`, `static/js/user/login.js`)
 - Edit account info (`templates/user/edit.html`, `static/js/user/edit.js`)
 - Reset password (`templates/user/reset_pwd.html`, `static/js/user/reset_pwd.js`)
 
-#### Wechat login
+### Wechat login
 
 `mina/app.js` defines a lot of helper functions such as:
 - `app.console()` for logging
