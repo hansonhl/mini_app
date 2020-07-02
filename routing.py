@@ -8,6 +8,7 @@ from web.controllers.member.member import member_blueprint
 from web.controllers.food.food import food_blueprint
 from web.controllers.finance.finance import finance_blueprint
 from web.controllers.stat.stat import stat_blueprint
+from web.controllers.upload.upload import upload_blueprint
 from web.controllers.api import api_blueprint
 
 from web.interceptors.auth import *
@@ -26,4 +27,5 @@ app.register_blueprint(member_blueprint, url_prefix="/member")
 app.register_blueprint(food_blueprint, url_prefix="/food")
 app.register_blueprint(finance_blueprint, url_prefix="/finance")
 app.register_blueprint(stat_blueprint, url_prefix="/stat")
+app.register_blueprint(upload_blueprint, url_prefix="/upload")
 app.register_blueprint(api_blueprint, url_prefix="/api")
