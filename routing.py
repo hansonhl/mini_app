@@ -1,4 +1,4 @@
-from common.libs.url_utils import build_url, build_static_url
+from common.libs.url_utils import build_url, build_static_url, build_image_url
 
 from web.controllers.index import index_blueprint
 from web.controllers.imooc import route_imooc
@@ -18,6 +18,7 @@ from web.interceptors.error import *
 # register python function as part of html template rendering
 app.add_template_global(build_url, "buildUrl")
 app.add_template_global(build_static_url, "buildStaticUrl")
+app.add_template_global(build_image_url, "buildImageUrl")
 
 app.register_blueprint(index_blueprint, url_prefix="/")
 app.register_blueprint(route_imooc, url_prefix="/imooc")

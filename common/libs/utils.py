@@ -32,3 +32,28 @@ def pagination(num_items, items_per_page, current_page, url):
     }
 
     return pagination_dict
+
+def get_id_to_model_dict(db_model, id_field, filter_by=None, filter_list=None):
+    """ If select_list is none, equivalent to:
+            SELECT * from db_model
+        If it is not none, equivalent to:
+            SELECT * from db_model WHERE filter_by IN filter_list
+
+        organize return result in dict mapping from id_field -> whole row
+        key_field is usually "id"
+    """
+    res = {}
+    query = db_model.query
+    if filter_by and filter_list and len(filter_list) > 0:
+        query = query.filter_by(filter_by.in_(filter_list))
+
+    l = query.all()
+    if l is None:
+        return None
+
+    for item in l:
+        if not hasattr(item, id_field):
+            break
+        else:
+            res[getattr(item, id_field)] = item
+    return res

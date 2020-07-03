@@ -116,10 +116,16 @@
     </div>
 </div>
 
+<!--pass config items defined in base config into front-end, values in here can be accessed by
+    js functions defined later on-->
+<div class="hidden hidden_input_wrapper">
+    <input name="domain" value="{{config.APP_CONFIGS.domain}}">
+    <input name="prefix" value="{{config.IMG_UPLOAD_CONFIGS.prefix_url}}">
+</div>
 <script src="{{ buildStaticUrl('/plugins/jquery-2.1.1.js') }}"></script>
 <script src="{{ buildStaticUrl('/bootstrap/bootstrap.min.js') }}"></script>
 <script src="{{ buildStaticUrl('/plugins/layer/layer.js') }}"></script>
 <script src="{{ buildStaticUrl('/js/common.js') }}"></script>
-{%block js %}{% endblock %}
+{% block js %}{% endblock %}
 </body>
 </html>

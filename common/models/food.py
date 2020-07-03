@@ -1,5 +1,6 @@
 # coding: utf-8
-from application import db
+from application import app, db
+from common.models.food_cat import FoodCat
 
 class Food(db.Model):
     __tablename__ = 'food'

@@ -24,6 +24,27 @@ def ueditor():
         return list_image()
     return "upload"
 
+@upload_blueprint.route("/title_pic", methods=["POST"])
+def title_pic():
+    res = {"state": "FAILURE", "url": "", "title": "", "original": ""}
+    upfile = request.files.get("title_pic", None)
+
+    # Respond with a string that is javascript code contained in html tags. This code will be executed by the
+    # element that is defined in the `target` attribute of the html form, which is the <iframe> element
+    # We want the <iframe> element to execute js code defined in set.js, which belongs to food/set.html, its parent.
+    # The method .upload.error() is defined by us in set.js
+    if upfile is None:
+        return tag_js("window.parent.upload.error('上传失败')")
+
+    upload_res = upload_by_file(upfile)
+    if upload_res["code"] != 200:
+        return tag_js("window.parent.upload.error('上传失败: %s')" % upload_res['msg'])
+
+    return tag_js("window.parent.upload.success('%s')" % upload_res["data"]["file_key"])
+
+def tag_js(script):
+    return "<script type='text/javascript'>%s</script>" % script
+
 def upload_image():
     """ Save image to server """
     # initialize json dict to return to ueditor

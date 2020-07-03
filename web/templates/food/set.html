@@ -14,7 +14,7 @@
         </div>
     </div>
 </div>
-<div class="row mg-t20 wrap_food_set" style="">
+<div class="row mg-t20 food_set_wrapper" style="">
     <div class="col-lg-12" style="">
         <h2 class="text-center">设置</h2>
         <div class="form-horizontal m-t" style="">
@@ -24,7 +24,11 @@
                     <select name="cat_id" class="form-control select2-hidden-accessible" tabindex="-1"
                             aria-hidden="true">
                         <option value="0">请选择分类</option>
-                        <option value="8">111</option>
+                        {% for cat in cat_list %}
+                            <option value="{{cat.id}}" {% if food and cat.id == food.cat_id %} selected {% endif %}}>
+                                {{cat.name}}
+                            </option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
@@ -32,25 +36,42 @@
             <div class="form-group">
                 <label class="col-lg-2 control-label">名称:</label>
                 <div class="col-lg-10">
-                    <input type="text" class="form-control" placeholder="请输入名称" name="name" value="">
+                    <input type="text" class="form-control" placeholder="请输入名称" name="name" value="{{food.name}}">
                 </div>
             </div>
             <div class="hr-line-dashed"></div>
             <div class="form-group">
                 <label class="col-lg-2 control-label">价格:</label>
                 <div class="col-lg-10">
-                    <input type="text" class="form-control" placeholder="请输入售价" name="price" value="">
+                    <input type="text" class="form-control" placeholder="请输入售价" name="price" value="{{food.price}}">
                 </div>
             </div>
             <div class="hr-line-dashed"></div>
             <div class="form-group">
                 <label class="col-lg-2 control-label">封面图:</label>
                 <div class="col-lg-10">
-                    <form class="upload_pic_wrap" target="upload_file" enctype="multipart/form-data" method="POST" action="{{ buildUrl('/upload/pic') }}">
+                    <!--There can only be one form element, no nested form elements allowed-->
+                    <!-- the target here corresponds to the iframe element at the end of this block -->
+                    <!-- the iframe allows file uploading without reloading the page -->
+                    <form class="title_pic_upload_wrapper" target="upload_file" enctype="multipart/form-data"
+                          method="POST" action="{{ buildUrl('/upload/title_pic') }}">
                         <div class="upload_wrap pull-left">
                             <i class="fa fa-upload fa-2x"></i>
-                            <input type="file" name="pic" accept="image/png, image/jpeg, image/jpg,image/gif">
+                            <input type="file" name="title_pic" accept="image/png, image/jpeg, image/jpg,image/gif">
                         </div>
+                        {% if food and food.main_image %}
+                        <span class="uploaded_pic">
+                            <img src="{{ buildImageUrl(food.main_image)}}" />
+                            <span class="fa fa-times-circle del del_image" data="{{food.main_image}}"></span>
+                        </span>
+                        {% endif %}
+                        <!--  uploaded image will be displayed here (see food/set.js: upload.success())
+
+                        <span class="uploaded_pic">
+                            <img/>
+                            <span class="... del_image"></span>
+                        </span>
+                        -->
                     </form>
                 </div>
             </div>
@@ -58,38 +79,52 @@
             <div class="form-group" style="">
                 <label class="col-lg-2 control-label">描述:</label>
                 <div class="col-lg-10">
-                    <textarea  id="editor"  name="summary" style="height: 300px;"></textarea>
+                    <textarea id="editor"  name="summary" style="height: 300px;">{{food.summary}}</textarea>
                 </div>
             </div>
             <div class="hr-line-dashed"></div>
             <div class="form-group">
                 <label class="col-lg-2 control-label">库存:</label>
                 <div class="col-lg-2">
-                    <input type="text" name="stock" class="form-control" value="1">
+                    <input type="text" name="stock" class="form-control" value="{{food.stock}}">
                 </div>
             </div>
             <div class="hr-line-dashed"></div>
             <div class="form-group">
                 <label class="col-lg-2 control-label">标签:</label>
                 <div class="col-lg-10">
-                    <input type="text" class="form-control" name="tags" value="">
+                    <input type="text" class="form-control" name="tags" value="{{food.tags}}">
                 </div>
             </div>
             <div class="hr-line-dashed"></div>
             <div class="form-group">
                 <div class="col-lg-4 col-lg-offset-2">
-                    <input type="hidden" name="id" value="0">
+                    <input type="hidden" name="id" value="{{food.id}}">
                     <button class="btn btn-w-m btn-outline btn-primary save">保存</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<!-- For image uploading, An iframe element is usually used to embed another document within the current HTML document. -->
+<iframe name="upload_file" class="hidden"></iframe>
+{% endblock %}
+{% block css %}
+<link href="{{ buildStaticUrl('/plugins/select2/select2.min.css')}}" rel="stylesheet">
+<link href="{{ buildStaticUrl('/plugins/tagsinput/jquery.tagsinput.min.css')}}" rel="stylesheet">
+
 {% endblock %}
 {% block js %}
 <script src="{{ buildStaticUrl('/plugins/ueditor/ueditor.config.js') }}"></script>
 <script src="{{ buildStaticUrl('/plugins/ueditor/ueditor.all.min.js') }}"></script>
 <script src="{{ buildStaticUrl('/plugins/ueditor/lang/zh-cn/zh-cn.js') }}"></script>
+
+<script src="{{ buildStaticUrl('/plugins/select2/select2.pinyin.js')}}"></script>
+<script src="{{ buildStaticUrl('/plugins/select2/zh-CN.js')}}"></script>
+<script src="{{ buildStaticUrl('/plugins/select2/pinyin.core.js')}}"></script>
+<script src="{{ buildStaticUrl('/plugins/tagsinput/jquery.tagsinput.min.js')}}"></script>
+
+
 <script src="{{ buildStaticUrl('/js/food/set.js') }}"></script>
 
 {% endblock %}

@@ -7473,19 +7473,19 @@ body.rtls.top-navigation .footer.fixed {
   padding: 5px 5px;
 }
 
-.upload_pic_wrap .pic-each{
+.title_pic_upload_wrapper .uploaded_pic{
   position: relative;
   float: left;
 }
 
-.upload_pic_wrap .pic-each img{
+.title_pic_upload_wrapper .uploaded_pic img{
   width: 100px;
   height: 60px;
   margin: 0 10px 15px 0;
   float: left;
 }
 
-.upload_pic_wrap .pic-each .del{
+.title_pic_upload_wrapper .uploaded_pic .del{
   position: absolute;
   right: 2px;
   top: -9px;

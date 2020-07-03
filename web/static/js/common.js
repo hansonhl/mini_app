@@ -151,6 +151,12 @@ var common_ops = {
             _param_url = "?" + _param_url;
         }
         return url + _param_url;
+    },
+    buildImgUrl: function(img_key) {
+        // the domain and prefix url values are obtained from hidden input elements in layout_main.html
+        var domain = $("div.hidden_input_wrapper input[name=domain]").val()
+        var prefix_url = $("div.hidden_input_wrapper input[name=prefix]").val()
+        return domain + prefix_url + img_key;
     }
 };
 
