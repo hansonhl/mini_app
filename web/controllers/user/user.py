@@ -4,7 +4,7 @@ from application import app, db
 from common.models.user import User
 from common.libs.utils import json_response, json_error_response, render_template_with_global_vars
 from common.libs.user_utils import generate_salted_pwd, generate_cookie, check_login
-from common.libs.url_manager import build_url
+from common.libs.url_utils import build_url
 
 user_blueprint = Blueprint("user", __name__)
 

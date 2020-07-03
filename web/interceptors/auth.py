@@ -4,7 +4,7 @@ import re
 from application import app
 from common.models.user import User
 from common.libs.user_utils import generate_auth_code
-from common.libs.url_manager import build_url
+from common.libs.url_utils import build_url
 from common.libs.log_utils import *
 
 

@@ -3,7 +3,7 @@ from sqlalchemy import or_
 
 from common.libs.utils import render_template_with_global_vars, pagination, json_response, json_error_response, \
     get_current_time
-from common.libs.url_manager import build_url
+from common.libs.url_utils import build_url
 from common.models.member import Member
 
 from application import app, db

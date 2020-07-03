@@ -1,4 +1,4 @@
-from common.libs.url_manager import build_url, build_static_url
+from common.libs.url_utils import build_url, build_static_url
 
 from web.controllers.index import index_blueprint
 from web.controllers.imooc import route_imooc

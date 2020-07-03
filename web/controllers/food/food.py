@@ -1,7 +1,7 @@
 from flask import Blueprint, request, make_response, redirect
 from common.libs.utils import render_template_with_global_vars, json_error_response, json_response, get_current_time
 from common.libs.utils import pagination
-from common.libs.url_manager import build_url
+from common.libs.url_utils import build_url
 from common.models.food_cat import FoodCat
 
 from application import app, db

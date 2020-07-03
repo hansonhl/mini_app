@@ -26,3 +26,13 @@ ACCOUNT_STATUS_MAPPING = {
     "1": "正常",
     "0": "已删除"
 }
+
+IMG_UPLOAD_CONFIGS = {
+    "allowed_extensions": {"jpg", "gif", "tmp", "jpeg", "png"},
+    "prefix_path": "/web/static/upload/",
+    "prefix_url": "/static/upload/"
+}
+
+APP_CONFIGS = {
+    "domain": "http://192.168.1.171:5000"
+}

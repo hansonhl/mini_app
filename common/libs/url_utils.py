@@ -12,6 +12,10 @@ def build_static_url(path):
     path = "/static" + path + "?ver=" + get_release_version()
     return build_url(path)
 
+def build_image_url(path):
+    # path should not start with "/"
+    return app.config["APP_CONFIGS"]["domain"] + app.config["IMG_UPLOAD_CONFIGS"]["prefix_url"] + path
+
 def get_release_version():
     ver = get_current_time("%Y%m%d%H%M%S")
     # release_path = app.config.get('RELEASE_PATH')
