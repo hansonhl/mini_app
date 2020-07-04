@@ -17,6 +17,7 @@ http://isoredirect.centos.org/centos/7/isos/x86_64/
 This enables downloading packages from online and ssh access.
 
 In the VM terminal:
+
 1. `# vi /etc/sysconfig/network-scripts/ifcfg-xx`, where
    `xx = enp0s3` on my machine. Set the last line `ONBOOT=yes` instead of `no`.
 2. `# service network restart`
@@ -60,6 +61,7 @@ share with the VM.
 3. Reboot the VM.
 
 In VM terminal (can be done using ssh access):
+
 4. `# mkdir /mnt/cdrom`
 5. `# mount /dev/cdrom /mnt/cdrom`
 6. `# cp -R /mnt/cdrom /usr/local/src/VBoxAdditions`
@@ -87,6 +89,7 @@ The imooc course gives a complicated method to install Python from source on
 CentOS7. Here is an easier method:
 
 In the VM terminal:
+
 1. `# yum update -y`
 2. `# yum install -y python3`
 3. `# python3` to verify installation
