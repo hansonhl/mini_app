@@ -56,6 +56,11 @@ var food_set_ops = {
                 return;
             }
 
+            var food_id = $(".food_set_wrapper input[name=id]").val();
+            if (food_id.length < 1) {
+                food_id = "0";
+            }
+
             var cat_id_target = $(".food_set_wrapper select[name=cat_id]");
             var cat_id = cat_id_target.val();
 
@@ -118,7 +123,7 @@ var food_set_ops = {
                 summary: summary,
                 stock: stock,
                 tags: tags,
-                id: $(".food_set_wrapper input[name=id]").val()
+                id: food_id
             };
 
             $.ajax({

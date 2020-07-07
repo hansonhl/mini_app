@@ -15,6 +15,8 @@ Page({
         scrollTop: "0",
         loadingMoreHidden: true,
         searchInput: '',
+        p: 1, // for dividing search results into pages
+        processing: false // whether we are waiting server to send over info for new page 
     },
     onLoad: function () {
         var that = this;
@@ -77,6 +79,7 @@ Page({
 			 ],
             loadingMoreHidden: false
         });
+        this.getBannerAndCat();
     },
     scroll: function (e) {
         var that = this, scrollTop = that.data.scrollTop;
@@ -95,7 +98,7 @@ Page({
 	            searchInput: e.detail.value
 	        });
 	 },
-	 toSearch:function( e ){
+	toSearch:function( e ){
 	        this.setData({
 	            p:1,
 	            goods:[],
@@ -114,5 +117,72 @@ Page({
         wx.navigateTo({
             url: "/pages/food/info?id=" + e.currentTarget.dataset.id
         });
+    },
+    getBannerAndCat: function () {
+        var that = this;
+        wx.request({
+            url: app.buildUrl('/food/index'),
+            method: 'GET',
+            header: app.getRequestHeader(),
+  
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content": res.msg});
+                    return;
+                } else {
+                    var data = res.data.data;
+                    that.setData({
+                        banners: data.bannerList,
+                        categories: data.catList
+                    })
+                }
+            }
+        });
+        that.getFoodList();
+    },
+    // defines event that happens when we click on an item in the category scroll-view
+    catClick: function(e) {
+        // e.currentTarget: the wxml element that triggered this event
+        // e.currentTarget.id: accessing the "id" attribute of the wxml element
+        this.setData({activeCategoryId: e.currentTarget.id});
+
+        // make request to backend
+        this.getFoodList();
+    },
+    getFoodList: function () {
+        var that = this;
+        var cat_id = that.data.activeCategoryId;
+        if (cat_id == "") cat_id = "0";
+        wx.request({
+            url: app.buildUrl('/food/search'),
+            method: 'GET',
+            header: app.getRequestHeader(),
+            data: {
+                cat_id: cat_id,
+                mix_kw: that.data.searchInput,
+                p: that.data.p
+            },
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content": res.msg});
+                    return;
+                } else {
+                    var data = res.data.data;
+                    that.setData({goods: data.list, p: that.data.p + 1 });
+                }
+            }
+        });
+    },
+    onReachBottom: function () {
+        var that = this;
+        if (that.data.processing) {
+            return;
+        }
+
+        that.setData({processing: true});
+        setTimeout(function () {
+            that.getFoodList();
+        }, 500);
+        app.console("Reached bottom");
     }
 });
