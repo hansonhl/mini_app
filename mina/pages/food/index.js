@@ -13,9 +13,9 @@ Page({
         activeCategoryId: 0,
         goods: [],
         scrollTop: "0",
-        loadingMoreHidden: true,
         searchInput: '',
         p: 1, // for dividing search results into pages
+        hasNextPage: true,
         processing: false // whether we are waiting server to send over info for new page 
     },
     onLoad: function () {
@@ -25,60 +25,9 @@ Page({
             title: app.globalData.shopName
         });
 
-        that.setData({
-            banners: [
-                {
-                    "id": 1,
-                    "pic_url": "/images/food.jpg"
-                },
-                {
-                    "id": 2,
-                    "pic_url": "/images/food.jpg"
-                },
-                {
-                    "id": 3,
-                    "pic_url": "/images/food.jpg"
-                }
-            ],
-            categories: [
-                {id: 0, name: "全部"},
-                {id: 1, name: "川菜"},
-                {id: 2, name: "东北菜"},
-            ],
-            activeCategoryId: 0,
-			goods: [
-			                {
-			                    "id": 1,
-			                    "name": "小鸡炖蘑菇-1",
-			                    "min_price": "15.00",
-			                    "price": "15.00",
-			                    "pic_url": "/images/food.jpg"
-			                },
-			                {
-			                    "id": 2,
-			                    "name": "小鸡炖蘑菇-1",
-			                    "min_price": "15.00",
-			                    "price": "15.00",
-			                    "pic_url": "/images/food.jpg"
-			                },
-			                {
-			                    "id": 3,
-			                    "name": "小鸡炖蘑菇-1",
-			                    "min_price": "15.00",
-			                    "price": "15.00",
-			                    "pic_url": "/images/food.jpg"
-			                },
-			                {
-			                    "id": 4,
-			                    "name": "小鸡炖蘑菇-1",
-			                    "min_price": "15.00",
-			                    "price": "15.00",
-			                    "pic_url": "/images/food.jpg"
-			                }
-
-			 ],
-            loadingMoreHidden: false
-        });
+        this.getBannerAndCat();
+    },
+    onShow: function () {
         this.getBannerAndCat();
     },
     scroll: function (e) {
@@ -107,6 +56,7 @@ Page({
 	        this.getFoodList();
 	},
     tapBanner: function (e) {
+        e.currentTarget.dataset
         if (e.currentTarget.dataset.id != 0) {
             wx.navigateTo({
                 url: "/pages/food/info?id=" + e.currentTarget.dataset.id
@@ -144,15 +94,26 @@ Page({
     catClick: function(e) {
         // e.currentTarget: the wxml element that triggered this event
         // e.currentTarget.id: accessing the "id" attribute of the wxml element
-        this.setData({activeCategoryId: e.currentTarget.id});
+        this.setData({
+            activeCategoryId: e.currentTarget.id,
+            p: 1, // initialize elements to make getFoodList work
+            goods: [],
+            hasNextPage: true
+        });
 
         // make request to backend
         this.getFoodList();
     },
     getFoodList: function () {
         var that = this;
+
+        if (that.data.processing) {
+            return;
+        }
+
         var cat_id = that.data.activeCategoryId;
         if (cat_id == "") cat_id = "0";
+        that.setData({processing: true});
         wx.request({
             url: app.buildUrl('/food/search'),
             method: 'GET',
@@ -164,25 +125,26 @@ Page({
             },
             success: function (res) {
                 if (res.data.code != 200) {
-                    app.alert({"content": res.msg});
+                    app.alert({content: res.msg, processing: false});
                     return;
                 } else {
                     var data = res.data.data;
-                    that.setData({goods: data.list, p: that.data.p + 1 });
+                    that.setData({
+                        goods: that.data.goods.concat(data.list), 
+                        p: that.data.p + 1, 
+                        processing: false,
+                        hasNextPage: data.has_next_page
+                    });
                 }
             }
         });
     },
     onReachBottom: function () {
         var that = this;
-        if (that.data.processing) {
-            return;
-        }
 
-        that.setData({processing: true});
         setTimeout(function () {
             that.getFoodList();
         }, 500);
-        app.console("Reached bottom");
+        
     }
 });

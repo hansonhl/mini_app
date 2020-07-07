@@ -2,7 +2,7 @@ from flask import Blueprint, request, make_response, redirect
 from decimal import Decimal
 
 from common.libs.utils import render_template_with_global_vars, json_error_response, json_response, get_current_time
-from common.libs.utils import pagination, get_id_to_model_dict
+from common.libs.utils import pagination, get_id_to_model_dict, get_int
 from common.libs.url_utils import build_url
 
 from common.models.food import Food
@@ -15,7 +15,7 @@ food_blueprint = Blueprint("food", __name__)
 
 @food_blueprint.route("/index")
 def index():
-    current_page = int(request.args.get("p", "1"))
+    current_page = get_int(request.args, "p", 1)
     values = request.values
     items_per_page = app.config["FOOD_INDEX_ITEMS_PER_PAGE"]
 
@@ -55,19 +55,20 @@ def index():
 
 @food_blueprint.route('/ops', methods=["POST"])
 def ops():
-    values = request.form
-    if "act" not in values or "id" not in values:
+    id = get_int(request.form, "id", 0)
+    act = request.form.get("act", None)
+    if "act" is None or "id" == 0:
         return json_error_response("无效的菜品项目编辑操作")
 
-    food_info = Food.query.filter_by(id=values["id"]).first()
+    food_info = Food.query.filter_by(id=id).first()
 
     if not food_info:
         return json_error_response("无效的菜品项目编辑操作")
 
-    if values["act"] == "remove":
+    if act == "remove":
         food_info.status = 0
         success_msg = "成功移除菜品项目 %s" % (food_info.name)
-    elif values["act"] == "recover":
+    elif act == "recover":
         success_msg = "成功恢复菜品项目 %s" % (food_info.name)
         food_info.status = 1
     else:
@@ -82,7 +83,7 @@ def ops():
 
 @food_blueprint.route("/info")
 def info():
-    id = int(request.args.get("id", "0"))
+    id = get_int(request.args, "id", 0)
     redir_response = make_response(redirect(build_url("/food/index")))
     if id == 0:
         return redir_response
@@ -102,7 +103,7 @@ def info():
 def set():
     if request.method == "GET":
         cat_list = FoodCat.query.all()
-        id = int(request.args.get("id", "0"))
+        id = get_int(request.args, "id", 0)
         food_info = Food.query.filter_by(id=id).first()
         if (id > 0 and food_info is None) or (food_info is not None and food_info.status != 1):
             return redirect(build_url("/food/index"))
@@ -111,13 +112,13 @@ def set():
                "cat_list": cat_list}
         return render_template_with_global_vars("food/set.html", context=ctx)
     elif request.method == "POST":
-        id = int(request.form.get("id", "0"))
-        cat_id = int(request.form.get("cat_id", "0"))
+        id = get_int(request.form, "id", 0)
+        cat_id = get_int(request.form, "cat_id", 0)
         name = request.form.get("name", "")
         price = request.form.get("price", "")
         title_pic = request.form.get("title_pic", "")
         summary = request.form.get("summary", "")
-        stock = int(request.form.get("stock", "0"))
+        stock = get_int(request.form, "stock", 0)
         tags = request.form.get("tags", "")
 
         # form content verification
@@ -172,7 +173,7 @@ def set():
 
 @food_blueprint.route("/cat")
 def cat():
-    current_page = int(request.args.get("p", "1"))
+    current_page = get_int(request.args, "p", 1)
     values = request.values
     items_per_page = app.config["FOOD_CAT_ITEMS_PER_PAGE"]
 
@@ -201,7 +202,7 @@ def cat():
 @food_blueprint.route("/cat_set", methods=["GET", "POST"])
 def cat_set():
     if request.method == "GET":
-        id = int(request.args.get("id", "0"))
+        id = get_int(request.args, "id", 0)
         if id > 0:
             cat_info = FoodCat.query.filter_by(id=id).first()
             if cat_info is None:
@@ -211,7 +212,7 @@ def cat_set():
         return render_template_with_global_vars("food/cat_set.html", context={"cat": cat_info})
 
     elif request.method == "POST":
-        id = int(request.form.get("id", "0"))
+        id = get_int(request.form, "id", 0)
         if id > 0:
             cat_info = FoodCat.query.filter_by(id=id).first()
             if cat_info is None:
@@ -241,19 +242,20 @@ def cat_set():
 
 @food_blueprint.route('/cat_ops', methods=["POST"])
 def cat_ops():
-    values = request.form
-    if "act" not in values or "id" not in values:
-        return json_error_response("无效的食品类别编辑操作")
+    id = get_int(request.form, "id", 0)
+    act = request.form.get("act", None)
+    if "act" is None or "id" == 0:
+        return json_error_response("无效的菜品项目编辑操作")
 
-    food_cat_info = FoodCat.query.filter_by(id=values["id"]).first()
+    food_cat_info = FoodCat.query.filter_by(id=id).first()
 
     if not food_cat_info:
         return json_error_response("无效的账号编辑操作")
 
-    if values["act"] == "remove":
+    if act == "remove":
         food_cat_info.status = 0
         success_msg = "成功移除食品类别 %s" % (food_cat_info.name)
-    elif values["act"] == "recover":
+    elif act == "recover":
         success_msg = "成功恢复食品类别 %s" % (food_cat_info.name)
         food_cat_info.status = 1
     else:

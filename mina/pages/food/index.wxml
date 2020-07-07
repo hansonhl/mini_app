@@ -38,7 +38,7 @@
   </view>
 
   <view class="goods-container">
-    <view class="goods-box" wx:for-items="{{goods}}" wx:key="id" bindtap="toDetailsTap">
+    <view class="goods-box" wx:for-items="{{goods}}" wx:key="id" data-id="{{item.id}}" bindtap="toDetailsTap">
       <view class="img-box">
         <image src="{{item.pic_url}}" class="image" mode="aspectFill" lazy-load="true" />
       </view>
@@ -49,5 +49,5 @@
       </view>
     </view>
   </view>
-  <view hidden="{{loadingMoreHidden ? true : false}}" class="no-more-goods">哥也是有底线的</view>
+  <view hidden="{{hasNextPage}}" class="no-more-goods">没有更多了</view>
 </view>

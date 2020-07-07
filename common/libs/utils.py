@@ -57,3 +57,11 @@ def get_id_to_model_dict(db_model, id_field, filter_by=None, filter_list=None):
         else:
             res[getattr(item, id_field)] = item
     return res
+
+def get_int(dict, key, default=None):
+    res_str = dict.get(key, default)
+    try:
+        res = int(res_str)
+    except ValueError:
+        return default
+    return res

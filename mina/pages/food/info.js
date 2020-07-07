@@ -20,9 +20,9 @@ Page({
         shopCarNum: 4,
         commentCount:2
     },
-    onLoad: function () {
+    onLoad: function (e) {
         var that = this;
-
+        that.setData({id: e.id}); // e directly contains html GET style arguments
         that.setData({
             "info": {
                 "id": 1,
@@ -57,8 +57,33 @@ Page({
                 }
             ]
         });
-
-        WxParse.wxParse('article', 'html', that.data.info.summary, that, 5);
+        this.getFoodInfo();
+    },
+    onShow: function () {
+        this.getFoodInfo();
+    },
+    getFoodInfo: function () {
+        var that = this;
+        wx.request({
+            url: app.buildUrl('/food/info?id=' + this.data.id),
+            method: 'GET',
+            header: app.getRequestHeader(),
+  
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content": res.msg});
+                    return;
+                } else {
+                    var data = res.data.data;
+                    that.setData({
+                        info: data.info,
+                        buyNumMax: data.info.stock
+                    })
+                    WxParse.wxParse('article', 'html', that.data.info.summary, that, 5);
+                }
+            }
+        });
+       
     },
     goShopCar: function () {
         wx.reLaunch({
@@ -126,5 +151,18 @@ Page({
         this.setData({
             swiperCurrent: e.detail.current
         })
+    },
+    onShareAppMessage: function () {
+        var that = this;
+        return {
+            title: that.data.info.name, 
+            path: app.buildUrl("/food/info?id=" + that.data.info.id),
+            success: function () {
+                //转发成功
+            },
+            fail: function () {
+                //转发失败
+            }
+        }
     }
 });
