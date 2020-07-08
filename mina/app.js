@@ -73,16 +73,14 @@ App({
     },
     getCache: function(key) {
         // wechat fxns to manipulate key-value pairs locally
+        // getStorageSync() and getStorage() have different syntax!!!!!
         var value = null;
         try {
-            value = wx.getStorageSync({
-                key: key
-              });
+            value = wx.getStorageSync(key);
         } catch (e) {
 
         }
         return value;
-        
     },
     setCache: function(key, value) {
         wx.setStorage({

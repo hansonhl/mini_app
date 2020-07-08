@@ -2,6 +2,7 @@
 //获取应用实例
 var app = getApp();
 var WxParse = require('../../wxParse/wxParse.js');
+var Utils = require("../../utils/util.js");
 
 Page({
     data: {
@@ -23,40 +24,6 @@ Page({
     onLoad: function (e) {
         var that = this;
         that.setData({id: e.id}); // e directly contains html GET style arguments
-        that.setData({
-            "info": {
-                "id": 1,
-                "name": "小鸡炖蘑菇",
-                "summary": '<p>多色可选的马甲</p><p><img src="http://www.timeface.cn/uploads/times/2015/07/071031_f5Viwp.jpg"/></p><p><br/>相当好吃了</p>',
-                "total_count": 2,
-                "comment_count": 2,
-                "stock": 2,
-                "price": "80.00",
-                "main_image": "/images/food.jpg",
-                "pics": [ '/images/food.jpg','/images/food.jpg' ]
-            },
-            buyNumMax:2,
-            commentList: [
-                {
-                    "score": "好评",
-                    "date": "2017-10-11 10:20:00",
-                    "content": "非常好吃，一直在他们加购买",
-                    "user": {
-                        "avatar_url": "/images/more/logo.png",
-                        "nick": "angellee 🐰 🐒"
-                    }
-                },
-                {
-                    "score": "好评",
-                    "date": "2017-10-11 10:20:00",
-                    "content": "非常好吃，一直在他们加购买",
-                    "user": {
-                        "avatar_url": "/images/more/logo.png",
-                        "nick": "angellee 🐰 🐒"
-                    }
-                }
-            ]
-        });
         this.getFoodInfo();
     },
     onShow: function () {
@@ -152,17 +119,33 @@ Page({
             swiperCurrent: e.detail.current
         })
     },
+    // This is executed when a button with the open-type="share" attribute is clicked
+    // or when the "share" option is clicked in the upper-right "..." menu
     onShareAppMessage: function () {
         var that = this;
         return {
             title: that.data.info.name, 
             path: app.buildUrl("/food/info?id=" + that.data.info.id),
+            /*
             success: function () {
-                //转发成功
+                // share successful, record this sharing instance to backend
+                wx.request({
+                    url: app.buildUrl('/food/info?id=' + this.data.id),
+                    method: 'POST',
+                    data: {
+                        url: Utils.getCurrentPageUrlWithArgs()
+                    },
+                    header: app.getRequestHeader(),
+                    success: function (res) {
+                        
+                    }
+                });
             },
             fail: function () {
                 //转发失败
             }
+            */ 
+           // success and fail are no longer supported
         }
     }
 });

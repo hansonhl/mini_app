@@ -107,6 +107,7 @@ Page({
             } else {
               that.setData({regFlag: false});
               app.setCache("token", res.data.data.token);
+              app.console("setting token to " + res.data.data.token);
               that.goToIndex();
             }
           }

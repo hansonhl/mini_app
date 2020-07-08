@@ -28,7 +28,15 @@ Page({
         this.getBannerAndCat();
     },
     onShow: function () {
+        this.initPageInfo();
         this.getBannerAndCat();
+    },
+    initPageInfo: function() {
+        this.setData({
+            p: 1, // initialize elements to make getFoodList work
+            goods: [],
+            hasNextPage: true
+        });
     },
     scroll: function (e) {
         var that = this, scrollTop = that.data.scrollTop;
@@ -77,7 +85,7 @@ Page({
   
             success: function (res) {
                 if (res.data.code != 200) {
-                    app.alert({"content": res.msg});
+                    app.alert({"content": res.data.msg});
                     return;
                 } else {
                     var data = res.data.data;
@@ -95,11 +103,10 @@ Page({
         // e.currentTarget: the wxml element that triggered this event
         // e.currentTarget.id: accessing the "id" attribute of the wxml element
         this.setData({
-            activeCategoryId: e.currentTarget.id,
-            p: 1, // initialize elements to make getFoodList work
-            goods: [],
-            hasNextPage: true
+            activeCategoryId: e.currentTarget.dataset.id,
         });
+
+        this.initPageInfo();
 
         // make request to backend
         this.getFoodList();

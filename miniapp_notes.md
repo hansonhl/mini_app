@@ -38,7 +38,7 @@ Each page has 4 components:
 
 In wxml, `data` variables are directly accessible by their name enclosed in `{{ }}`.
 
-```wxml
+```xml
 <view class="{{myvar2}}">
     {{myvar}}
 </view>
@@ -67,7 +67,7 @@ Control syntax are expressed using the attribute `wx:if` and `wx:for` in wxml el
 
 Conditionals use the `wx:if` attribute. The value of the attribute must be enclosed in `{{ }}`.
 
-```wxml
+```xml
 <view wx:if="{{condition}}"> True </view>
 
 <view wx:if="{{length > 5}}"> 1 </view>
@@ -91,7 +91,7 @@ change these variable names by specifying `wx:for-index` and `wx:for-item` attri
 
 Nested for loops are supported.
 
-```wxml
+```xml
 <view wx:for="{{array}}">
   {{index}}: {{item.message}}
 </view>
@@ -140,7 +140,7 @@ Page({
 
 Corresponding wxml:
 
-```wxml
+```xml
 <switch wx:for="{{objectArray}}" wx:key="unique" style="display: block;"> {{item.id}} </switch>
 <button bindtap="switch"> Switch </button>
 <button bindtap="addToFront"> Add to the front </button>
@@ -148,19 +148,48 @@ Corresponding wxml:
 
 The `switch` tag is repeated for each element in `objectArray`.
 
-## Common APIs and methods
+## Coordination between wxml and js
 
 ### Binding events that happen to wxml elements
 
 Use the `bindtap` attribute to specify the function that will be executed when an item is tapped:
 
-```wxml
-<view bindtap="myFunc"></view>
+```xml
+<view bindtap="myFunc"> ... </view>
 ```
 
 where `myFunc` is the name of a method defined in the `Page` object.
 
-### Setting and getting `data` variables in javascript
+
+### Setting and getting attributes associated with wxml elements
+
+By binding a js function to a wxml element's event, the function may take an optional parameter (usually 
+denoted as `e`) that contains information about the event, including info about the element that triggered it.
+
+That element is accessed using `e.currentTarget`
+
+**Accessing `data` attributes**
+
+Similar to HTML, we may associate data with wxml elements, fill the data attribute using templating,
+and access the data in js code. This is accessed by `e.currentTarget.dataset.[data_field_name]` where in the 
+wxml element the data attribute is `<data-[data_field_name]="..."`.
+
+```xml
+<view data-myid="{{item.id}}" bindtap="myFunc"> ... </view>
+```
+
+```js
+// in the definition of the Page object:
+Page({
+    // ...
+    myFunc: function (e) {
+        var id_from_wxml_data = e.currentTarget.dataset.myid;
+        console.log(id_from_wxml_data);
+    }
+})
+```
+
+### Setting and getting `data` variables stored in the `Page` object in javascript
 
 **In js code:**
 
@@ -186,6 +215,43 @@ Page({
     }
 })
 
+```
+
+## Defining behavior of a page through js
+
+### Events associated with the page
+
+Each event is an attribute in the object that is passed into the constructor of `Page`
+
+#### `onLoad: function (e) {}`
+
+Event that happens when the page loads.
+
+#### `onShow: function (e) {}`
+
+Event that happens when the page is displayed in the user's view.
+
+## Common API methods: linking and web requests
+
+### Linking to another page when tapping on a button (similar to `<a href="...">` in html)
+
+This is done by binding a js function to an element using the `bindtap` attribute for wxml elements. 
+The js function then calls the `wx.navigateTo()` method. Example:
+
+```xml
+<view bindtap="toIndex"> ... </view>
+```
+
+```js
+// in the definition of the Page object:
+Page({
+    // ...
+    toIndex: function () {
+        wx.navigateTo({
+            url: "/url/to/Index"
+        });
+    }
+})
 ```
 
 ### HTML requests `wx.request`

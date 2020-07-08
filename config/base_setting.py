@@ -18,6 +18,11 @@ IGNORE_COOKIE_AUTH_URLS = [
     "^/api"
 ] # use regexp
 
+IGNORE_API_AUTH_URLS = [
+    "^/api/member/login",
+    "^/api/member/check-reg"
+]
+
 ACCOUNT_INDEX_ITEMS_PER_PAGE = 30
 MEMBER_INDEX_ITEMS_PER_PAGE = 30
 FOOD_CAT_ITEMS_PER_PAGE = 30

@@ -77,3 +77,8 @@ def check_reg():
 
     # similar function to cookies, token is saved in front end so we may save login status
     return json_response("登录成功", data={"token": generate_token(member_info)})
+
+@api_blueprint.route("/memnber/share", methods=["POST"])
+def member_share():
+
+    return json_response()
