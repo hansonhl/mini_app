@@ -1,14 +1,18 @@
-from flask import request
+from flask import request, g
 import math
 from sqlalchemy import or_
 
 from web.controllers.api import api_blueprint
 from common.libs.utils import json_response, json_error_response, get_current_time, get_int
 from common.libs.url_utils import build_image_url
+from common.libs.cart_utils import get_cart_quantity
+
+from common.models.member import Member
 from common.models.food import Food
 from common.models.food_cat import FoodCat
 
-from application import app, db
+
+from application import app
 
 @api_blueprint.route("/food/index")
 def food_index():
@@ -79,8 +83,10 @@ def food_info():
     if food_info.status != 1:
         return json_error_response("该菜品已下架！")
 
+    member_info = g.current_member
+    member_id = member_info.id if member_info else 0
     main_image_url = build_image_url(food_info.main_image)
-    data = {
+    info = {
                 "id": food_id,
                 "name": food_info.name,
                 "summary": food_info.summary,
@@ -89,6 +95,7 @@ def food_info():
                 "stock": food_info.stock,
                 "price": str(food_info.price),
                 "main_image": main_image_url,
-                "pics": [main_image_url]
+                "pics": [main_image_url],
+                "cart_quantity": get_cart_quantity(member_id, food_id)
             }
-    return json_response(data={"info": data})
+    return json_response(data={"info": info})

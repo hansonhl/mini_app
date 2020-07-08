@@ -20,7 +20,8 @@ IGNORE_COOKIE_AUTH_URLS = [
 
 IGNORE_API_AUTH_URLS = [
     "^/api/member/login",
-    "^/api/member/check-reg"
+    "^/api/member/check-reg",
+    "^/api/food/index"
 ]
 
 ACCOUNT_INDEX_ITEMS_PER_PAGE = 30

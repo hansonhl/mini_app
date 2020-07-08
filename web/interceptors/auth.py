@@ -56,9 +56,8 @@ def api_member_auth():
     if pattern.match(request.path):
         return
 
-    member_info = check_api_login()
-    if member_info:
-        g.member_info = member_info
+    g.current_member = check_api_login()
+    if g.current_member:
         app.logger.info("[%s - api_member_auth()] User is logged in by checking cookies" % request.path)
     else:
         app.logger.info("[%s - api_member_auth()] User is not yet logged in " % request.path)

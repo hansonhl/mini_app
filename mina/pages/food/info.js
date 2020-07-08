@@ -13,7 +13,7 @@ Page({
         hideShopPopup: true,
         buyNumber: 1,
         buyNumMin: 1,
-        buyNumMax:1,
+        buyNumMax: 1,
         canSubmit: false, //  选中时候是否允许加入购物车
         shopCarInfo: {},
         shopType: "addShopCar",//购物类型，加入购物车或立即购买，默认为加入购物车,
@@ -38,13 +38,16 @@ Page({
   
             success: function (res) {
                 if (res.data.code != 200) {
-                    app.alert({"content": res.msg});
+                    app.alert({"content": res.data.msg});
                     return;
                 } else {
                     var data = res.data.data;
+                    var quantity = data.info.cart_quantity;
                     that.setData({
                         info: data.info,
-                        buyNumMax: data.info.stock
+                        buyNumMax: data.info.stock,
+                        shopCarNum: quantity,
+                        buyNumber: app.boundInt(quantity, that.data.buyNumMin, data.info.stock)
                     })
                     WxParse.wxParse('article', 'html', that.data.info.summary, that, 5);
                 }
@@ -70,7 +73,22 @@ Page({
         this.bindGuiGeTap();
     },
     addShopCar: function () {
-
+        var that = this;
+        var data = {
+            food_id: this.data.id,
+            quantity: this.data.buyNumber
+        };
+        wx.request({
+            url: app.buildUrl('/cart/set'),
+            method: 'POST',
+            data: data,
+            header: app.getRequestHeader(),
+  
+            success: function (res) {
+                app.alert({"content": res.data.msg});
+                that.setData({hideShopPopup: true});
+            }
+        });
     },
     buyNow: function () {
         wx.navigateTo({
