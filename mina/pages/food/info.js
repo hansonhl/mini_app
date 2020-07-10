@@ -14,11 +14,11 @@ Page({
         buyNumber: 1,
         buyNumMin: 1,
         buyNumMax: 1,
+        shopCarNum: 0,
         canSubmit: false, //  选中时候是否允许加入购物车
         shopCarInfo: {},
         shopType: "addShopCar",//购物类型，加入购物车或立即购买，默认为加入购物车,
         id: 0,
-        shopCarNum: 4,
         commentCount:2
     },
     onLoad: function (e) {
@@ -43,11 +43,11 @@ Page({
                 } else {
                     var data = res.data.data;
                     var quantity = data.info.cart_quantity;
+                    var buyNumber = app.boundInt(quantity, that.data.buyNumMin, data.info.stock);
                     that.setData({
                         info: data.info,
                         buyNumMax: data.info.stock,
-                        shopCarNum: quantity,
-                        buyNumber: app.boundInt(quantity, that.data.buyNumMin, data.info.stock)
+                        buyNumber: buyNumber
                     })
                     WxParse.wxParse('article', 'html', that.data.info.summary, that, 5);
                 }
@@ -86,13 +86,26 @@ Page({
   
             success: function (res) {
                 app.alert({"content": res.data.msg});
-                that.setData({hideShopPopup: true});
+                that.setData({hideShopPopup: true, shopCarNum: data.quantity});
             }
         });
     },
     buyNow: function () {
+        var purchaseList = [{
+            "food_id": this.data.info.id,
+            "price": this.data.info.price,
+            "quantity": this.data.buyNumber
+        }];
+
+        var data = {
+            type: "info",
+            purchaseList: purchaseList
+        };
+        this.setData({
+            hideShopPopup: true
+        });
         wx.navigateTo({
-            url: "/pages/order/index"
+            url: "/pages/order/index?data=" + JSON.stringify(data)
         });
     },
     /**

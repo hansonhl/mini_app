@@ -1,4 +1,4 @@
-from application import db
+from application import app, db
 
 from common.libs.utils import get_current_time
 from common.models.member_cart import MemberCart
@@ -24,15 +24,27 @@ def set_cart_info(member_id=0, food_id=0, quantity=0):
     return cart_info
 
 def delete_cart_info(member_id=0, food_id=0):
-    if member_id < 1 or food_id < 1:
-        return False
-    cart_info_query = MemberCart.query.filter_by(member_id=member_id, food_id=food_id)
-    if cart_info_query.count() < 1:
-        return False
-    cart_info_query.delete()
-    db.session.commit()
+    if isinstance(food_id, int):
+        if member_id < 1 or food_id < 1:
+            return False
+        cart_info_query = MemberCart.query.filter_by(member_id=member_id, food_id=food_id)
+        if cart_info_query.count() < 1:
+            return False
+        cart_info_query.delete()
+        db.session.commit()
+        return True
+    elif isinstance(food_id, list):
+        if member_id < 1 or len(food_id) < 1:
+            return False
+        cart_info_query = MemberCart.query.filter(MemberCart.member_id == member_id,
+                                                  MemberCart.food_id.in_(food_id))
+        count = cart_info_query.count()
 
-    return True
+        cart_info_query.delete(synchronize_session=False)
+        db.session.commit()
+
+        app.logger.debug("member_id %d, list %s, deleted %d items" % (member_id, str(food_id), count))
+        return True
 
 def get_cart_quantity(member_id=0, food_id=0):
     if member_id < 1 or food_id < 1:

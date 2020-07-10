@@ -33,6 +33,7 @@ def pagination(num_items, items_per_page, current_page, url):
 
     return pagination_dict
 
+
 def get_id_to_model_dict(db_model, id_field, filter_by=None, filter_list=None):
     """ If select_list is none, equivalent to:
             SELECT * from db_model
