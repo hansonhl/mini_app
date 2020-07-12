@@ -10,7 +10,7 @@
      </view>
      <view class="goods-list">
         <view class="list-title">商品列表</view>
-        <view class="a-goods" wx:for-items="{{goods_list}}" wx:key="{{index}}">
+        <view class="a-goods" wx:for-items="{{order_list}}" wx:key="{{index}}">
             <view class="img-box">
                 <image src="{{item.pic_url}}" class="img" />
             </view>
@@ -29,8 +29,8 @@
      <view class="peisong-way">
         <view class="row-box">
             <view class="row-label">配送方式</view>
-            <view class="right-text" wx:if="{{yun_price > 0}}">快递</view>
-            <view class="right-text" wx:if="{{yun_price == 0}}">包邮</view>
+            <view class="right-text" wx:if="{{deliver_price > 0}}">快递</view>
+            <view class="right-text" wx:if="{{deliver_price == 0}}">包邮</view>
         </view>
         <view class="row-box">
             <view class="row-label">备注</view>
@@ -47,7 +47,7 @@
         </view>
         <view class="row-box">
             <view class="row-label">运费</view>
-            <view class="right-text">+ ¥ {{yun_price}}</view>
+            <view class="right-text">+ ¥ {{deliver_price}}</view>
         </view>
      </view>
 

@@ -13,7 +13,7 @@ Page({
                 status_desc: "待支付",
                 deadline:"2018-07-31 12:00",
                 pay_price: "85.00",
-                yun_price: 0.00,
+                deliver_price: 0.00,
                 total_price: "85.00",
                 address: {
                     name: "编程浪子",

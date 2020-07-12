@@ -34,6 +34,7 @@ Page({
     //计算是否都没有选
     noSelect: function () {
         var list = this.data.list;
+        if (!list || list.length == 0) return true;
         var noSelect = 0;
         for (var i = 0; i < list.length; i++) {
             var curItem = list[i];
@@ -188,8 +189,8 @@ Page({
                     var totalPrice = that.totalPrice();
                     // console.log("totalPrice " + totalPrice);
                     that.setData({totalPrice: totalPrice});
-                    // that.setPageData(that.getSaveHide(), that.totalPrice(), that.allSelect(),
-                    //     that.noSelect(), that.data.list);
+                    that.setPageData(that.getSaveHide(), that.totalPrice(), that.allSelect(),
+                        that.noSelect(), that.data.list);
                 }
             }
         });

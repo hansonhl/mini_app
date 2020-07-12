@@ -57,7 +57,7 @@
         </view>
         <view class="row-box">
             <view class="row-label">运费</view>
-            <view class="right-text">+ ¥ {{info.yun_price}}</view>
+            <view class="right-text">+ ¥ {{info.deliver_price}}</view>
         </view>
         <view class="row-box">
             <view class="row-label">应付总额</view>

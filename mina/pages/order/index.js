@@ -3,43 +3,48 @@ var app = getApp();
 
 Page({
     data: {
-        goods_list: [
-            {
-                id:22,
-                name: "小鸡炖蘑菇",
-                price: "85.00",
-                pic_url: "/images/food.jpg",
-                number: 1,
-            },
-            {
-                id:22,
-                name: "小鸡炖蘑菇",
-                price: "85.00",
-                pic_url: "/images/food.jpg",
-                number: 1,
-            }
-        ],
-        default_address: {
-            name: "编程浪子",
-            mobile: "12345678901",
-            detail: "上海市浦东新区XX",
-        },
-        yun_price: "1.00",
-        pay_price: "85.00",
-        total_price: "86.00",
+        order_list: [],
+        default_address: null,
+        deliver_price: "0.00",
+        pay_price: "0.00",
+        total_price: "0.00",
         params: null
     },
     onShow: function () {
         var that = this;
+        this.getOrderInfo();
     },
     onLoad: function (e) {
         var that = this;
+        that.setData({
+            params: JSON.parse(e.data)
+        });
     },
     createOrder: function (e) {
         wx.showLoading();
         var that = this;
-        wx.navigateTo({
-            url: "/pages/my/order_list"
+        var data = {
+            type: this.data.params.type,
+            purchaseList: JSON.stringify(this.data.params.purchaseList)
+        };
+
+        wx.request({
+            url: app.buildUrl('/order/create'),
+            method: 'POST',
+            data: data,
+            header: app.getRequestHeader(),
+
+            success: function (res) {
+                wx.hideLoading();
+                if (res.data.code != 200) {
+                    app.alert({"content":res.data.msg});
+                } else {
+                    var data = res.data.data;
+                    wx.navigateTo({
+                        url: "/pages/my/order_list"
+                    });
+                }
+            }
         });
     },
     addressSet: function () {
@@ -51,6 +56,33 @@ Page({
         wx.navigateTo({
             url: "/pages/my/addressList"
         });
-    }
+    },
+    getOrderInfo: function () {
+        var that = this;
+        var data = {
+            type: this.data.params.type,
+            purchaseList: JSON.stringify(this.data.params.purchaseList)
+        };
+        wx.request({
+            url: app.buildUrl('/order/info'),
+            method: 'POST',
+            data: data,
+            header: app.getRequestHeader(),
 
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content":res.data.msg});
+                } else {
+                    var data = res.data.data;
+                    that.setData({
+                        order_list: data.order_list,
+                        default_address: data.default_address,
+                        deliver_price: data.deliver_price,
+                        pay_price: data.pay_price,
+                        total_price: data.total_price
+                    });
+                }
+            }
+        });
+    }
 });

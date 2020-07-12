@@ -4,6 +4,7 @@ from decimal import Decimal
 from common.libs.utils import render_template_with_global_vars, json_error_response, json_response, get_current_time
 from common.libs.utils import pagination, get_id_to_model_dict, get_int
 from common.libs.url_utils import build_url
+from common.libs.food_utils import set_food_stock_change_log
 
 from common.models.food import Food
 from common.models.food_cat import FoodCat
@@ -155,17 +156,12 @@ def set():
         food_info.updated_time = get_current_time()
 
         db.session.add(food_info)
-        ret = db.session.commit()
+        db.session.commit()
 
         # add entry into food stock change log
-        stock_change_info = FoodStockChangeLog()
-        stock_change_info.food_id = food_info.id
-        stock_change_info.unit = int(stock) - int(before_stock)
-        stock_change_info.total_stock = stock
-        stock_change_info.note = "后台直接更改"
-        stock_change_info.created_time = get_current_time()
-        db.session.add(stock_change_info)
-        db.session.commit()
+        if not set_food_stock_change_log(food_info.id, int(before_stock),
+                                         int(stock) - int(before_stock), "后台直接更改"):
+            return json_error_response("登记库存变更信息出现错误")
 
         return json_response("成功添加菜品 %s" % name)
 
