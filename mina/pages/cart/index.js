@@ -13,36 +13,37 @@ Page({
         var list = this.data.list;
         if (index !== "" && index != null) {
             list[ parseInt(index) ].active = !list[ parseInt(index) ].active;
-            this.setPageData(this.getSaveHide(), this.totalPrice(), this.allSelect(), this.noSelect(), list);
+            this.updatePageData(list);
         }
     },
     //计算是否全选了
-    allSelect: function () {
+    checkAllSelected: function () {
         var list = this.data.list;
-        var allSelect = false;
+        if (!list) return false;
+        var allSelected = false;
         for (var i = 0; i < list.length; i++) {
             var curItem = list[i];
             if (curItem.active) {
-                allSelect = true;
+                allSelected = true;
             } else {
-                allSelect = false;
+                allSelected = false;
                 break;
             }
         }
-        return allSelect;
+        return allSelected;
     },
     //计算是否都没有选
-    noSelect: function () {
+    checkNoneSelected: function () {
         var list = this.data.list;
         if (!list || list.length == 0) return true;
-        var noSelect = 0;
+        var notSelected = 0;
         for (var i = 0; i < list.length; i++) {
             var curItem = list[i];
             if (!curItem.active) {
-                noSelect++;
+                notSelected++;
             }
         }
-        if (noSelect == list.length) {
+        if (notSelected == list.length) {
             return true;
         } else {
             return false;
@@ -50,21 +51,20 @@ Page({
     },
     //全选和全部选按钮
     bindAllSelect: function () {
-        var currentAllSelect = this.data.allSelect;
+        var currentAllSelect = this.data.allSelected;
         var list = this.data.list;
         for (var i = 0; i < list.length; i++) {
             list[i].active = !currentAllSelect;
         }
-        this.setPageData(this.getSaveHide(), this.totalPrice(), !currentAllSelect, this.noSelect(), list);
+        this.updatePageData(list);
     },
     //加数量
     addBtnTap: function (e) {
-        var that = this;
         var index = parseInt(e.currentTarget.dataset.index);
         var list = that.data.list;
         list[index].quantity++;
-        that.setPageData(that.getSaveHide(), that.totalPrice(), that.allSelect(), that.noSelect(), list);
         this.setCart(list[index].food_id, list[index].quantity);
+        this.updatePageData(list);
     },
     //减数量
     minusBtnTap: function (e) {
@@ -72,8 +72,8 @@ Page({
         var list = this.data.list;
         if (list[index].quantity > 1) {
             list[index].quantity--;
-            this.setPageData(this.getSaveHide(), this.totalPrice(), this.allSelect(), this.noSelect(), list);
             this.setCart(list[index].food_id, list[index].quantity);
+            this.updatePageData(list);
         }
     },
     //编辑默认全不选
@@ -83,7 +83,7 @@ Page({
             var curItem = list[i];
             curItem.active = false;
         }
-        this.setPageData(!this.getSaveHide(), this.totalPrice(), this.allSelect(), this.noSelect(), list);
+        this.updatePageData(list);
     },
     //选中完成默认全选
     saveTap: function () {
@@ -92,13 +92,14 @@ Page({
             var curItem = list[i];
             curItem.active = true;
         }
-        this.setPageData(!this.getSaveHide(), this.totalPrice(), this.allSelect(), this.noSelect(), list);
+        this.updatePageData(list);
     },
-    getSaveHide: function () {
-        return this.data.saveHidden;
+    checkSaveButtonHidden: function () {
+        return this.data.saveButtonHidden;
     },
-    totalPrice: function () {
+    getTotalPrice: function () {
         var list = this.data.list;
+        if (!list) return 0.00;
         var totalPrice = 0.00;
         for (var i = 0; i < list.length; i++) {
             if ( !list[i].active) {
@@ -108,13 +109,22 @@ Page({
         }
         return totalPrice;
     },
+    updatePageData: function (list) {
+        this.setData({
+            list: list,
+            saveButtonHidden: this.checkSaveButtonHidden(),
+            totalPrice: this.getTotalPrice(),
+            allSelected: this.checkAllSelected(),
+            noneSelected: this.checkNoneSelected()
+        });
+    },
     setPageData: function (saveHidden, total, allSelect, noSelect, list) {
         this.setData({
             list: list,
-            saveHidden: saveHidden,
+            saveButtonHidden: saveHidden,
             totalPrice: total,
-            allSelect: allSelect,
-            noSelect: noSelect,
+            allSelected: allSelect,
+            noneSelected: noSelect,
         });
     },
     //去结算
@@ -155,7 +165,7 @@ Page({
             }
             return !item.active;
         });
-        this.setPageData( this.getSaveHide(), this.totalPrice(), this.allSelect(), this.noSelect(), list);
+        this.updatePageData(list);
         //发送请求到后台删除数据
         wx.request({
             url: app.buildUrl('/cart/delete'),
@@ -181,16 +191,15 @@ Page({
                     var data = res.data.data;
                     that.setData({
                         list: data.list,
-                        saveHidden: true,
-                        allSelect: true,
-                        noSelect: false
+                        saveButtonHidden: true,
+                        allSelected: true,
+                        noneSelected: false
                     });
                     // console.log("list length " + that.data.list.length);
-                    var totalPrice = that.totalPrice();
+                    var totalPrice = that.getTotalPrice();
                     // console.log("totalPrice " + totalPrice);
                     that.setData({totalPrice: totalPrice});
-                    that.setPageData(that.getSaveHide(), that.totalPrice(), that.allSelect(),
-                        that.noSelect(), that.data.list);
+                    that.updatePageData(that.data.list);
                 }
             }
         });

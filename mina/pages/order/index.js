@@ -39,8 +39,9 @@ Page({
                 if (res.data.code != 200) {
                     app.alert({"content":res.data.msg});
                 } else {
-                    var data = res.data.data;
-                    wx.navigateTo({
+                    // use redirectTo() instead of navigateTo() to prevent user from returning
+                    // back to this page and submit a duplicate order
+                    wx.redirectTo({
                         url: "/pages/my/order_list"
                     });
                 }

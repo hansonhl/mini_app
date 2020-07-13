@@ -11,8 +11,8 @@
 
     <view class="list-top" wx:if="{{ list && list.length > 0}}">
         <view class="label">购物车</view>
-        <view class="edit-btn" hidden="{{!saveHidden}}" bindtap="editTap">编辑</view>
-        <view class="edit-btn" hidden="{{saveHidden}}" bindtap="saveTap">完成</view>
+        <view class="edit-btn" hidden="{{!saveButtonHidden}}" bindtap="editTap">编辑</view>
+        <view class="edit-btn" hidden="{{saveButtonHidden}}" bindtap="saveTap">完成</view>
     </view>
 
     <view class="goodsList">
@@ -37,10 +37,10 @@
     </view>
     <view class="jiesuan-box">
         <view class="left-price">
-            <view class="all-selected  {{allSelect?'active':''}}" bindtap="bindAllSelect">全选</view>
-            <view class="total" hidden="{{noSelect}}">合计：¥ {{totalPrice}}</view>
+            <view class="all-selected  {{allSelected?'active':''}}" bindtap="bindAllSelect">全选</view>
+            <view class="total" hidden="{{noneSelected}}">合计：¥ {{totalPrice}}</view>
         </view>
-        <view class="to-pay-btn {{noSelect?'no-select':''}}" hidden="{{!saveHidden || noSelect}}" bindtap="toPayOrder">去结算</view>
-        <view class="to-pay-btn {{noSelect?'no-select':''}}" hidden="{{saveHidden}}" bindtap="deleteSelected">删除</view>
+        <view class="to-pay-btn {{noneSelected?'no-select':''}}" hidden="{{!saveButtonHidden || noneSelected}}" bindtap="toPayOrder">去结算</view>
+        <view class="to-pay-btn {{noneSelected?'no-select':''}}" hidden="{{saveButtonHidden}}" bindtap="deleteSelected">删除</view>
     </view>
 </view>
