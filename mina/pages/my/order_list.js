@@ -3,14 +3,14 @@ Page({
     data: {
         statusType: ["待付款", "待发货", "待收货", "待评价", "已完成","已关闭"],
         status:[ "-8","-7","-6","-5","1","0" ],
-        currentType: 0,
+        currentStatusIdx: 0,
         tabClass: ["", "", "", "", "", ""]
     },
     statusTap: function (e) {
-        var curType = e.currentTarget.dataset.index;
-        this.data.currentType = curType;
+        var currStatusIdx = e.currentTarget.dataset.index;
+        this.data.currentStatusIdx = currStatusIdx;
         this.setData({
-            currentType: curType
+            currentStatusIdx: currStatusIdx
         });
         this.onShow();
     },
@@ -28,26 +28,7 @@ Page({
     },
     onShow: function () {
         var that = this;
-        that.setData({
-            order_list: [
-                {
-					status: -8,
-                    status_desc: "待支付",
-                    date: "2018-07-01 22:30:23",
-                    order_number: "20180701223023001",
-                    note: "记得周六发货",
-                    total_price: "85.00",
-                    goods_list: [
-                        {
-                            pic_url: "/images/food.jpg"
-                        },
-                        {
-                            pic_url: "/images/food.jpg"
-                        }
-                    ]
-                }
-            ]
-        });
+        this.getOrderList();
     },
     onHide: function () {
         // 生命周期函数--监听页面隐藏
@@ -64,5 +45,28 @@ Page({
     onReachBottom: function () {
         // 页面上拉触底事件的处理函数
 
+    },
+    getOrderList: function () {
+        var that = this;
+        var data = {
+            status: parseInt(this.data.status[this.data.currentStatusIdx])
+        }
+        wx.request({
+            url: app.buildUrl('/my/order'),
+            method: 'POST',
+            data: data,
+            header: app.getRequestHeader(),
+
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content":res.data.msg});
+                } else {
+                    var data = res.data.data;
+                    that.setData({
+                        order_list: data.pay_order_list
+                    });
+                }
+            }
+        });
     }
 })

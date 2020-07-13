@@ -41,12 +41,12 @@ def get_id_to_model_dict(db_model, id_field, filter_by=None, filter_list=None):
             SELECT * from db_model WHERE filter_by IN filter_list
 
         organize return result in dict mapping from id_field -> whole row
-        key_field is usually "id"
+        id_field is usually "id"
     """
     res = {}
     query = db_model.query
     if filter_by and filter_list and len(filter_list) > 0:
-        query = query.filter_by(filter_by.in_(filter_list))
+        query = query.filter(filter_by.in_(filter_list))
 
     l = query.all()
     if l is None:
