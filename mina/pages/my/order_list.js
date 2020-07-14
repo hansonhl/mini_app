@@ -30,22 +30,6 @@ Page({
         var that = this;
         this.getOrderList();
     },
-    onHide: function () {
-        // 生命周期函数--监听页面隐藏
-
-    },
-    onUnload: function () {
-        // 生命周期函数--监听页面卸载
-
-    },
-    onPullDownRefresh: function () {
-        // 页面相关事件处理函数--监听用户下拉动作
-
-    },
-    onReachBottom: function () {
-        // 页面上拉触底事件的处理函数
-
-    },
     getOrderList: function () {
         var that = this;
         var data = {
@@ -53,6 +37,29 @@ Page({
         }
         wx.request({
             url: app.buildUrl('/my/order'),
+            method: 'POST',
+            data: data,
+            header: app.getRequestHeader(),
+
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content":res.data.msg});
+                } else {
+                    var data = res.data.data;
+                    that.setData({
+                        order_list: data.pay_order_list
+                    });
+                }
+            }
+        });
+    },
+    toPay: function (e) {
+        var that = this;
+        var data = {
+            order_sn: e.currentTarget.dataset.ordersn
+        }
+        wx.request({
+            url: app.buildUrl('/order/pay'),
             method: 'POST',
             data: data,
             header: app.getRequestHeader(),

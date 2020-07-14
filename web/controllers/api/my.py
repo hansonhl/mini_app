@@ -73,6 +73,7 @@ def my_order():
             "status_desc": order.pay_status_desc,
             "date": order.created_time.strftime("%Y-%m-%d %H:%M:%S"),
             "order_number": order.order_number,
+            "order_sn": order.order_sn,
             "note": order.note,
             "total_price": str(order.total_price),
             "goods_list": oid_to_items[order.id]

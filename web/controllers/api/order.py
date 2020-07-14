@@ -9,6 +9,8 @@ from common.libs.cart_utils import delete_cart_info
 from common.libs.pay_utils import create_order
 
 from common.models.food import Food
+from common.models.pay_order import PayOrder
+from common.models.oauth_member_bind import OauthMemberBind
 
 from application import app, db
 
@@ -82,3 +84,26 @@ def order_create():
         delete_cart_info(member_id, food_id_list)
 
     return make_response(jsonify(res))
+
+@api_blueprint.route("/order/pay", methods=["POST"])
+def order_pay():
+    if g.current_member is None:
+        return json_error_response("请先登录再完成支付")
+    if g.current_member.status != 1:
+        return json_error_response("该账户已被注销，无法完成支付")
+    member_info = g.current_member
+
+    order_sn = request.form.get("order_sn", None)
+    if order_sn is None:
+        return json_error_response("支付失败，请稍后再试（1）")
+
+    pay_order_info = PayOrder.query.filter_by(order_sn=order_sn).first()
+    if pay_order_info is None:
+        return json_error_response("支付失败，请稍后再试（2）")
+
+    # get openid for member
+    oauth_bind_info = OauthMemberBind.query.filter_by(member_id=member_info.id).first()
+    if oauth_bind_info is None:
+        return json_error_response("支付失败，请稍后再试（3）")
+
+    return json_response()

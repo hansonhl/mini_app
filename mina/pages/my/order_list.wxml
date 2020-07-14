@@ -32,7 +32,7 @@
             <view class="price-box">
                 <view class="total-price">合计：¥ {{item.total_price}}</view>
                 <view class="btn cancel-btn">取消订单</view>
-                <view class="btn topay-btn">马上付款</view>
+                <view class="btn topay-btn" bindtap="toPay" data-ordersn="{{item.order_sn}}">马上付款</view>
             </view>  
         </view>
 
