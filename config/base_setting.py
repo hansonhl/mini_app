@@ -41,9 +41,8 @@ IMG_UPLOAD_CONFIGS = {
     "prefix_url": "/static/upload/"
 }
 
-APP_CONFIGS = {
-    "domain": "http://192.168.1.171:5000"
-}
+DOMAIN = "http://192.168.1.171:5000"
+
 
 PAY_STATUS_MAPPING = {
     "0": "订单已关闭",

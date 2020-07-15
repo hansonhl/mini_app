@@ -4,9 +4,10 @@ import json
 
 from web.controllers.api import api_blueprint
 from common.libs.utils import json_response, json_error_response, get_current_time, get_int
-from common.libs.url_utils import build_image_url
+from common.libs.url_utils import build_image_url, build_url
 from common.libs.cart_utils import delete_cart_info
 from common.libs.pay_utils import create_order
+from common.libs.wechat_utils import get_pay_info, get_nonce_str
 
 from common.models.food import Food
 from common.models.pay_order import PayOrder
@@ -105,5 +106,20 @@ def order_pay():
     oauth_bind_info = OauthMemberBind.query.filter_by(member_id=member_info.id).first()
     if oauth_bind_info is None:
         return json_error_response("支付失败，请稍后再试（3）")
+
+    notify_url = build_url("/api/order/callback")
+    data = {
+        "appid": app.config["MINA_APP_ID"],
+        "mch_id": app.config["MCH_ID"],
+        "nonce_str": get_nonce_str(),
+        "body": "订餐",
+        "out_trade_no": pay_order_info.order_sn,
+        "total_fee": int(pay_order_info.total_price * 100), #单位为分
+        "notify_url": notify_url,
+        "trade_type": "JSAPI",
+        "openid": oauth_bind_info.openid
+    }
+
+    get_pay_info(data)
 
     return json_response()

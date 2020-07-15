@@ -5,7 +5,7 @@ from common.libs.utils import get_current_time
 
 def build_url(path):
     if "DOMAIN" in app.config:
-        path = app.config["DOMAIN"]['www'] + path
+        path = app.config["DOMAIN"] + path
     return path
 
 def build_static_url(path):
@@ -14,7 +14,7 @@ def build_static_url(path):
 
 def build_image_url(path):
     # path should not start with "/"
-    return app.config["APP_CONFIGS"]["domain"] + app.config["IMG_UPLOAD_CONFIGS"]["prefix_url"] + path
+    return app.config["DOMAIN"] + app.config["IMG_UPLOAD_CONFIGS"]["prefix_url"] + path
 
 def get_release_version():
     ver = get_current_time("%Y%m%d%H%M%S")
