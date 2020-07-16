@@ -6,8 +6,8 @@ from web.controllers.api import api_blueprint
 from common.libs.utils import json_response, json_error_response, get_current_time, get_int
 from common.libs.url_utils import build_image_url, build_url
 from common.libs.cart_utils import delete_cart_info
-from common.libs.pay_utils import create_order
-from common.libs.wechat_utils import get_pay_info, get_nonce_str
+import common.libs.pay_utils as pay_utils
+import common.libs.wechat_utils as wc_utils
 
 from common.models.food import Food
 from common.models.pay_order import PayOrder
@@ -76,7 +76,7 @@ def order_create():
         return json_error_response("订单内容不能为空，下单失败")
 
     params = {}
-    res = create_order(member_id, order_list, params=params)
+    res = pay_utils.create_order(member_id, order_list, params=params)
     app.logger.debug("type of res: %s" % type(res))
     app.logger.debug("res error: %s" % str(res))
 
@@ -111,7 +111,7 @@ def order_pay():
     data = {
         "appid": app.config["MINA_APP_ID"],
         "mch_id": app.config["MCH_ID"],
-        "nonce_str": get_nonce_str(),
+        "nonce_str": wc_utils.get_nonce_str(),
         "body": "订餐",
         "out_trade_no": pay_order_info.order_sn,
         "total_fee": int(pay_order_info.total_price * 100), #单位为分
@@ -120,6 +120,48 @@ def order_pay():
         "openid": oauth_bind_info.openid
     }
 
-    get_pay_info(data)
+    prepay_info = wc_utils.get_pay_info(data)
 
-    return json_response()
+    # save prepay_id to database
+    pay_order_info.prepay_id = prepay_info["prepay_id"]
+    db.session.add(pay_order_info)
+    db.session.commit()
+
+    return json_response(data={"prepay_info":prepay_info})
+
+
+@api_blueprint.route("/order/callback", methods=["POST"])
+def order_callback():
+    """ 支付结果通知 """
+    fail_res = {"return_code": "FAIL", "return_msg": "FAIL"}
+    header = {"Content-Type": "application/xml"}
+    callback_data = wc_utils.xml_to_dict(request.data)
+    sign = callback_data["sign"]
+    callback_data.pop("sign")
+    check_sign = wc_utils.create_sign(callback_data)
+    if sign != check_sign:
+        return wc_utils.dict_to_xml(fail_res), header
+
+    order_sn = callback_data["out_trade_no"]
+    pay_order_info = PayOrder.query.filter_by(order_sn=order_sn).first()
+
+    if pay_order_info is None:
+        return wc_utils.dict_to_xml(fail_res), header
+
+    if int(pay_order_info.total_price * 100) != int(callback_data["total_fee"]):
+        return wc_utils.dict_to_xml(fail_res), header
+
+    success_res = {"return_code": "SUCCESS", "return_msg": "OK"}
+    if pay_order_info.status == 1:
+        return wc_utils.dict_to_xml(success_res), header
+
+    # callback succeeded, modify records and states in database
+    pay_sn = callback_data["transaction_id"]
+    pay_utils.order_success(pay_order_id=pay_order_info.id, pay_sn=pay_sn)
+
+    # add record of this successful transaction to database
+    pay_utils.add_pay_callback_data(pay_order_id=pay_order_info.id,
+                                    data=request.data) # pass raw form of data
+
+
+    return wc_utils.dict_to_xml(success_res), header

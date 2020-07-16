@@ -23,13 +23,20 @@ def get_pay_info(pay_data=None):
         if prepay_id is None:
             return json_error_response("支付失败，请稍后再试（4）")
         prepay_data = {
-            "appid": pay_data.get("appid"),
-            "noncestr": pay_data.get("noncestr"),
+            "appId": pay_data.get("appid"),
+            "nonceStr": pay_data.get("nonce_str"),
             "package": "prepay_id=" + prepay_id,
-            "sign_type": "MD5",
-            "timestamp": str(int(time.time()))
+            "signType": "MD5",
+            "timeStamp": str(int(time.time()))
         }
-    return
+        prepay_sign = create_sign(prepay_data)
+        prepay_data.pop("appId")
+        prepay_data["paySign"] = prepay_sign
+        prepay_data["prepay_id"] = prepay_id
+
+        return prepay_data
+    else:
+        return None
 
 def create_sign(pay_data):
     s = "&".join("%s=%s" % (k, v) for k, v in sorted(pay_data.items()))

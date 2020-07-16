@@ -69,9 +69,20 @@ Page({
                     app.alert({"content":res.data.msg});
                 } else {
                     var data = res.data.data;
-                    that.setData({
-                        order_list: data.pay_order_list
-                    });
+                    var prepay_info = data.prepay_info;
+                    wx.requestPayment({
+                        "timeStamp": prepay_info.timeStamp,
+                        "nonceStr": prepay_info.nonceStr,
+                        "package": prepay_info.package,
+                        "signType": "MD5",
+                        "paySign": prepay_info.paySign,
+                        "success": function (res) {
+
+                        },
+                        "fail": function (res) {
+
+                        }
+                    })
                 }
             }
         });

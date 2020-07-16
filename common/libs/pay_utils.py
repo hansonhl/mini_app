@@ -6,8 +6,10 @@ from common.libs.utils import get_current_time
 from common.libs.food_utils import set_food_stock_change_log
 
 from common.models.food import Food
+from common.models.food_sale_change_log import FoodSaleChangeLog
 from common.models.pay_order import PayOrder
 from common.models.pay_order_item import PayOrderItem
+from common.models.pay_order_callback_data import PayOrderCallbackData
 
 
 def create_order(member_id, items, params=None):
@@ -91,6 +93,52 @@ def create_order(member_id, items, params=None):
         "total_price": str(pay_order.total_price)
     }
     return res
+
+def order_success(pay_order_id=0, pay_sn=""):
+    # pessimistic concurrent handling:
+    try:
+        pay_order_info = PayOrder.query.filter_by(id=pay_order_id).first()
+        if pay_order_info is None or pay_order_info.status not in [-8, -7]:
+            return True
+
+        pay_order_info.pay_sn = pay_sn
+        pay_order_info.status = 1
+        pay_order_info.deliver_status = -7
+        pay_order_info.pay_time = get_current_time()
+        pay_order_info.updated_time = get_current_time()
+        db.session.add(pay_order_info)
+
+        # update FoodSaleChangeLog
+        pay_order_items = PayOrderItem.filter_by(pay_order_id=pay_order_id).all()
+        for order_item in pay_order_items:
+            sale_log = FoodSaleChangeLog()
+            sale_log.food_id = order_item.food_id
+            sale_log.quantity = order_item.quantity
+            sale_log.price = order_item.price
+            sale_log.member_id = order_item.member_id
+            sale_log.created_time = get_current_time()
+            db.session.add(sale_log)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return False
+
+    return True
+
+def add_pay_callback_data( pay_order_id=0, type="pay", data=""):
+    cb_info = PayOrderCallbackData()
+    cb_info.pay_order_id = pay_order_id
+    if type == "pay":
+        cb_info.pay_data = data
+        cb_info.refund_data = ""
+    else:
+        cb_info.pay_data = ""
+        cb_info.refund_data = data
+
+    cb_info.created_time = cb_info.updated_time = get_current_time()
+    db.session.add(cb_info)
+    db.session.commit()
+    return True
 
 def generate_order_sn():
     m = hashlib.md5()
