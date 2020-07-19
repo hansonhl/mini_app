@@ -1,15 +1,15 @@
 {
   "pages": [
-    "pages/my/order_list",
-    "pages/cart/index",
     "pages/index/index",
 
+    "pages/cart/index",
 
     "pages/food/index",
     "pages/food/info",
     "pages/order/index",
 
     "pages/my/order_info",
+    "pages/my/order_list",
     "pages/my/addressList",
     "pages/my/addressSet",
     "pages/my/commentList",

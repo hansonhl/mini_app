@@ -6,7 +6,7 @@
             <view class="{{tabClass[index]}}"></view>
         </view>
     </view>
-    <view class="no-order" hidden="{{order_list ? true : false}}">
+    <view class="no-order" hidden="{{order_list && order_list.length > 0}}">
         <image src="/images/no-order.png" class="no-order-img"></image>
         <view class="text">暂无订单</view>
     </view>

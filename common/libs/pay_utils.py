@@ -4,6 +4,7 @@ import hashlib, time, random
 
 from common.libs.utils import get_current_time
 from common.libs.food_utils import set_food_stock_change_log
+import common.libs.queue_utils as queue_utils
 
 from common.models.food import Food
 from common.models.food_sale_change_log import FoodSaleChangeLog
@@ -107,9 +108,10 @@ def order_success(pay_order_id=0, pay_sn=""):
         pay_order_info.pay_time = get_current_time()
         pay_order_info.updated_time = get_current_time()
         db.session.add(pay_order_info)
+        db.session.commit()
 
         # update FoodSaleChangeLog
-        pay_order_items = PayOrderItem.filter_by(pay_order_id=pay_order_id).all()
+        pay_order_items = PayOrderItem.query.filter_by(pay_order_id=pay_order_id).all()
         for order_item in pay_order_items:
             sale_log = FoodSaleChangeLog()
             sale_log.food_id = order_item.food_id
@@ -119,9 +121,17 @@ def order_success(pay_order_id=0, pay_sn=""):
             sale_log.created_time = get_current_time()
             db.session.add(sale_log)
         db.session.commit()
+
     except Exception as e:
+        app.logger.error("%s" % e)
         db.session.rollback()
         return False
+
+    # add item to queue to notify that the payment has succeeded
+    queue_utils.push("pay", {
+        "member_id": pay_order_info.member_id,
+        "pay_order_id": pay_order_info.id
+    })
 
     return True
 

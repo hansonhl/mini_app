@@ -1,3 +1,5 @@
 DEBUG = True
 
 SQLALCHEMY_ECHO = False
+
+DEV_MODE = True

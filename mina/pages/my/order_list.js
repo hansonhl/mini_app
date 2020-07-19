@@ -12,7 +12,7 @@ Page({
         this.setData({
             currentStatusIdx: currStatusIdx
         });
-        this.onShow();
+        this.getOrderList();
     },
     orderDetail: function (e) {
         wx.navigateTo({
@@ -70,19 +70,35 @@ Page({
                 } else {
                     var data = res.data.data;
                     var prepay_info = data.prepay_info;
-                    wx.requestPayment({
-                        "timeStamp": prepay_info.timeStamp,
-                        "nonceStr": prepay_info.nonceStr,
-                        "package": prepay_info.package,
-                        "signType": "MD5",
-                        "paySign": prepay_info.paySign,
-                        "success": function (res) {
-
-                        },
-                        "fail": function (res) {
-
-                        }
-                    })
+                    if (!data.dev_mode) {
+                        app.console("Requesting payment, prepay_info" + JSON.stringify(prepay_info));
+                        wx.requestPayment({
+                            "timeStamp": prepay_info.timeStamp,
+                            "nonceStr": prepay_info.nonceStr,
+                            "package": prepay_info.package,
+                            "signType": "MD5",
+                            "paySign": prepay_info.paySign,
+                            "success": function (res) {
+                                app.console("success: ", res);
+                            },
+                            "fail": function (res) {
+                                app.console("Fail: " + JSON.stringify(res));
+                            }
+                        });
+                    } else {
+                        // directly send callback to backend to complete
+                        // payment loop for development purposes.
+                        var cb_dev_data = {xml: data.cb_dev_data};
+                        wx.request({
+                            url: app.buildUrl("/order/callback_dev"),
+                            method: "POST",
+                            data: cb_dev_data,
+                            header: app.getRequestHeader(),
+                            success: function (res) {
+                                app.alert({"content":res.data.msg});
+                            }
+                        });
+                    }
                 }
             }
         });

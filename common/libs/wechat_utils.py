@@ -20,14 +20,19 @@ def get_pay_info(pay_data=None):
     app.logger.debug("Request sent:\n%s" % r.text)
     if r.status_code == 200:
         prepay_id = xml_to_dict(r.text).get("prepay_id", None)
-        if prepay_id is None:
-            return json_error_response("支付失败，请稍后再试（4）")
+
+        if prepay_id is None and not app.config["DEV_MODE"]:
+            return None
+
+        if app.config["DEV_MODE"] and prepay_id is None:
+            prepay_id = pay_data["out_trade_no"]
+
         prepay_data = {
             "appId": pay_data.get("appid"),
             "nonceStr": pay_data.get("nonce_str"),
             "package": "prepay_id=" + prepay_id,
             "signType": "MD5",
-            "timeStamp": str(int(time.time()))
+            "timeStamp": str(int(time.time())),
         }
         prepay_sign = create_sign(prepay_data)
         prepay_data.pop("appId")
@@ -39,10 +44,10 @@ def get_pay_info(pay_data=None):
         return None
 
 def create_sign(pay_data):
-    s = "&".join("%s=%s" % (k, v) for k, v in sorted(pay_data.items()))
+    s = "&".join("%s=%s" % (k, pay_data[k]) for k in sorted(pay_data))
     s = s + "&key=" + app.config["PAY_API_SECRET_KEY"]
-    sign = hashlib.md5(s.encode("utf-8")).hexdigest()
-    return sign.upper()
+    sign = hashlib.md5(s.encode("utf-8")).hexdigest().upper()
+    return sign
 
 def dict_to_xml(d):
     xml = ["<xml>"] + ["<{0}>{1}</{0}>".format(k, v) for k, v in d.items()] + \

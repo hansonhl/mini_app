@@ -1,11 +1,16 @@
-from application import app
+from application import app, manager
 from routing import *
 
-from flask_script import Manager, Server
+from flask_script import Server
 import sys, traceback
+from jobs.launcher import Job
 
-manager = Manager(app)
+
 manager.add_command("runserver", Server(host="0.0.0.0", port=app.config["SERVER_PORT"], use_debugger=True))
+
+# job entrance
+manager.add_command("run", Job())
+
 
 def main():
     manager.run()

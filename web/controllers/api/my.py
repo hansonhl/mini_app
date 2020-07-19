@@ -26,25 +26,28 @@ def my_order():
     if status is None:
         return json_error_response("查询订单信息失败，请注明订单状态")
 
+    app.logger.debug("status %d" % status)
+
     pay_order_query = PayOrder.query.filter_by(member_id=member_id)
 
     if status == -8: #待付款
-        pay_order_query.filter(PayOrder.status == -8)
-    elif status == -7: #待发货
-        pay_order_query.filter(PayOrder.status == 1, PayOrder.deliver_status == -7)
+        pay_order_query = pay_order_query.filter(PayOrder.status == -8)
+    elif status == -7: #待付款
+        pay_order_query = pay_order_query.filter(PayOrder.status == 1, PayOrder.deliver_status == -7)
     elif status == -6: #待确认
-        pay_order_query.filter(PayOrder.status == 1, PayOrder.deliver_status == -6)
+        pay_order_query = pay_order_query.filter(PayOrder.status == 1, PayOrder.deliver_status == -6)
     elif status == -5: #待评价
-        pay_order_query.filter(PayOrder.status == 1, PayOrder.deliver_status == 1,
+        pay_order_query = pay_order_query.filter(PayOrder.status == 1, PayOrder.deliver_status == 1,
                                PayOrder.comment_status == 0)
     elif status == 1: #已完成
-        pay_order_query.filter(PayOrder.status == 1, PayOrder.deliver_status == 1,
+        pay_order_query = pay_order_query.filter(PayOrder.status == 1, PayOrder.deliver_status == 1,
                                PayOrder.comment_status == 1)
     elif status == 0: #未完成
-        pay_order_query.filter(PayOrder.status.in_([0, -1, -2, -9]))
+        pay_order_query = pay_order_query.filter(PayOrder.status.in_([0, -1, -2, -9]))
     else:
         return json_error_response("查询订单信息失败，订单状态有误")
 
+    app.logger.debug("number of entries with status %d: %d" % (status, pay_order_query.count()))
     pay_order_list = pay_order_query.order_by(PayOrder.id.desc()).all()
     pay_order_data_list = []
     if pay_order_list:

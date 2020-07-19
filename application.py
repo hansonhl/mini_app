@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_script import Manager
 import os, json
 
 class Application(Flask):
@@ -30,6 +31,9 @@ class Application(Flask):
 
 templates_dir = os.path.join(os.getcwd(), "web", "templates")
 static_dir = os.path.join(os.getcwd(), "web", "static")
+
 app = Application(__name__, templates_dir, static_dir)
 
 db = SQLAlchemy(app)
+
+manager = Manager(app)
