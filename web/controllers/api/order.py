@@ -257,3 +257,36 @@ def order_callback_dev():
                                     data=xml_data)  # pass raw form of data
 
     return json_response("【开发模式】付款成功，信息已录入数据库")
+
+
+@api_blueprint.route("/order/ops", methods=["POST"])
+def order_ops():
+    if g.current_member is None:
+        return json_error_response("请先登录再完成支付")
+    if g.current_member.status != 1:
+        return json_error_response("该账户已被注销，无法完成支付")
+    member_info = g.current_member
+
+    order_sn = request.form.get("order_sn", None)
+    if order_sn is None:
+        return json_error_response("订单操作失败（1）")
+
+    action = request.form.get("action", None)
+    if action is None:
+        return json_error_response("订单操作失败（2）")
+
+    pay_order_info = PayOrder.query.filter_by(order_sn=order_sn).first()
+    if pay_order_info is None:
+        return json_error_response("订单操作失败（3）")
+
+    if action == "delete":
+        pass
+    elif action == "confirm":
+        pay_order_info.deliver_status = 1
+        pay_order_info.updated_time = get_current_time()
+        db.session.add(pay_order_info)
+        db.session.commit()
+        return json_response("确认收货成功")
+    elif action == "comment":
+        pass
+

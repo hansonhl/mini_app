@@ -160,3 +160,7 @@ def generate_order_sn():
         sn = m.hexdigest()
         if not PayOrder.query.filter_by(order_sn=sn).first():
             return sn
+
+def close_order(pay_order_id):
+
+    return False

@@ -1,8 +1,8 @@
 var app = getApp();
 Page({
     data: {
-        statusType: ["待付款", "待发货", "待收货", "待评价", "已完成","已关闭"],
-        status:[ "-8","-7","-6","-5","1","0" ],
+        statusType: ["待付款", "待发货", "待收货", "待评价", "已完成", "已关闭"],
+        status: ["-8", "-7", "-6", "-5", "1", "0"],
         currentStatusIdx: 0,
         tabClass: ["", "", "", "", "", ""]
     },
@@ -43,7 +43,7 @@ Page({
 
             success: function (res) {
                 if (res.data.code != 200) {
-                    app.alert({"content":res.data.msg});
+                    app.alert({"content": res.data.msg});
                 } else {
                     var data = res.data.data;
                     that.setData({
@@ -66,16 +66,16 @@ Page({
         // first check if user has saved subscription settings locally
         wx.getSetting({
             withSubscriptions: true,
-            success: function(res) {
+            success: function (res) {
                 var subSetting = res.subscriptionsSetting;
                 var askForPermission = true;
                 if (subSetting.hasOwnProperty(itemSettings)) {
                     var itemSettings = subSetting.itemSettings;
                     if (itemSettings.hasOwnProperty(template_id)) {
-                       askForPermission = false;
-                       if (itemSettings[template_id] == "accept") {
-                           data.subscribed = true;
-                       }
+                        askForPermission = false;
+                        if (itemSettings[template_id] == "accept") {
+                            data.subscribed = true;
+                        }
                     }
                 }
                 // TODO: deal with case when `res.subscriptionsSetting.mainSwitch == false`
@@ -114,7 +114,7 @@ Page({
 
             success: function (res) {
                 if (res.data.code != 200) {
-                    app.alert({"content":res.data.msg});
+                    app.alert({"content": res.data.msg});
                 } else {
                     var data = res.data.data;
                     var prepay_info = data.prepay_info;
@@ -157,8 +157,50 @@ Page({
             data: cb_dev_data,
             header: app.getRequestHeader(),
             success: function (res) {
-                app.alert({"content":res.data.msg});
+                app.alert({"content": res.data.msg});
                 that.onShow();
+            }
+        });
+    },
+    orderCancel: function (e) {
+        this.orderOps(e.currentTarget.dataset.ordersn, "cancel", "确认取消订单吗？");
+    },
+    orderConfirm: function (e) {
+        this.orderOps(e.currentTarget.dataset.ordersn, "confirm", "确认收到货了吗？");
+    },
+    orderComment: function (e) {
+        this.orderOps(e.currentTarget.dataset.ordersn, "comment", null);
+    },
+    orderOps: function (order_sn, action, msg) {
+        var that = this;
+        if (msg) {
+            app.tip({
+                "title": "订单操作",
+                "content": msg,
+                "cb_confirm": function () {
+                    that.orderOpsRequest(order_sn, action);
+                }
+            });
+        } else {
+            that.orderOpsRequest(order_sn, action);
+        }
+    },
+    orderOpsRequest: function (order_sn, action) {
+        var that = this;
+        wx.request({
+            url: app.buildUrl("/order/ops"),
+            method: "POST",
+            data: {
+                order_sn: order_sn,
+                action: action
+            },
+            header: app.getRequestHeader(),
+            success: function (res) {
+                var data = res.data.data;
+                app.alert({"content": res.data.msg});
+                if (res.data.code == 200) {
+                    that.onShow();
+                }
             }
         });
     }

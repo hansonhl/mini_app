@@ -31,8 +31,10 @@
             </view>
             <view class="price-box">
                 <view class="total-price">合计：¥ {{item.total_price}}</view>
-                <view class="btn cancel-btn">取消订单</view>
-                <view class="btn topay-btn" bindtap="toPay" data-ordersn="{{item.order_sn}}">马上付款</view>
+                <view class="btn cancel-btn" bindtap="orderCancel" data-ordersn="{{item.order_sn}}" wx:if="{{item.status == -8}}">取消订单</view>
+                <view class="btn topay-btn" bindtap="toPay" data-ordersn="{{item.order_sn}}" wx:if="{{item.status == -8}}">马上付款</view>
+                <view class="btn cancel-btn" bindtap="orderConfirm" data-ordersn="{{item.order_sn}}" wx:if="{{item.status == -6}}">确认收货</view>
+                <view class="btn cancel-btn" bindtap="orderComment" data-ordersn="{{item.order_sn}}" wx:if="{{item.status == -5}}">评价订单</view>
             </view>  
         </view>
 

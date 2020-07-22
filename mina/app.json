@@ -1,5 +1,7 @@
 {
   "pages": [
+    "pages/my/order_list",
+
     "pages/index/index",
 
     "pages/cart/index",
@@ -9,7 +11,7 @@
     "pages/order/index",
 
     "pages/my/order_info",
-    "pages/my/order_list",
+
     "pages/my/addressList",
     "pages/my/addressSet",
     "pages/my/commentList",
