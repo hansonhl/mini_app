@@ -55,9 +55,29 @@ Page({
     },
     toPay: function (e) {
         var that = this;
+        var template_ids = ["7--0oU7_LN9YjbGFUmRnLDpfikYeC09tpcVnRPffZHY"];
         var data = {
-            order_sn: e.currentTarget.dataset.ordersn
+            order_sn: e.currentTarget.dataset.ordersn,
+            subscribed: false
         }
+        // request user's permission to allow subscribe messages
+        wx.requestSubscribeMessage({
+            tmplIds: template_ids,
+            success: function (res) {
+                for (var id of template_ids) {
+                    if (res.hasOwnProperty(id) && res[id] == "accept") {
+                        data.subscribed = true;
+                    }
+                }
+                that.doPay(data);
+            },
+            fail: function (res) {
+                that.doPay(data);
+            }
+        })
+    },
+    doPay: function (data) {
+        var that = this;
         wx.request({
             url: app.buildUrl('/order/pay'),
             method: 'POST',
@@ -71,35 +91,46 @@ Page({
                     var data = res.data.data;
                     var prepay_info = data.prepay_info;
                     if (!data.dev_mode) {
-                        app.console("Requesting payment, prepay_info" + JSON.stringify(prepay_info));
-                        wx.requestPayment({
-                            "timeStamp": prepay_info.timeStamp,
-                            "nonceStr": prepay_info.nonceStr,
-                            "package": prepay_info.package,
-                            "signType": "MD5",
-                            "paySign": prepay_info.paySign,
-                            "success": function (res) {
-                                app.console("success: ", res);
-                            },
-                            "fail": function (res) {
-                                app.console("Fail: " + JSON.stringify(res));
-                            }
-                        });
+                        that.finishPay(prepay_info);
                     } else {
-                        // directly send callback to backend to complete
-                        // payment loop for development purposes.
-                        var cb_dev_data = {xml: data.cb_dev_data};
-                        wx.request({
-                            url: app.buildUrl("/order/callback_dev"),
-                            method: "POST",
-                            data: cb_dev_data,
-                            header: app.getRequestHeader(),
-                            success: function (res) {
-                                app.alert({"content":res.data.msg});
-                            }
-                        });
+                        that.finishPayDev(data);
                     }
                 }
+            }
+        });
+    },
+    finishPay: function (prepay_info) {
+        var that = this;
+        app.console("Requesting payment, prepay_info" + JSON.stringify(prepay_info));
+        wx.requestPayment({
+            "timeStamp": prepay_info.timeStamp,
+            "nonceStr": prepay_info.nonceStr,
+            "package": prepay_info.package,
+            "signType": "MD5",
+            "paySign": prepay_info.paySign,
+            "success": function (res) {
+                app.console("success: ", res);
+                that.onShow();
+            },
+            "fail": function (res) {
+                app.console("Fail: " + JSON.stringify(res));
+                that.onShow();
+            }
+        });
+    },
+    finishPayDev: function (data) {
+        // directly send callback to backend to complete
+        // payment loop for development purposes.
+        var that = this;
+        var cb_dev_data = {xml: data.cb_dev_data};
+        wx.request({
+            url: app.buildUrl("/order/callback_dev"),
+            method: "POST",
+            data: cb_dev_data,
+            header: app.getRequestHeader(),
+            success: function (res) {
+                app.alert({"content":res.data.msg});
+                that.onShow();
             }
         });
     }

@@ -107,6 +107,9 @@ def order_pay():
     if oauth_bind_info is None:
         return json_error_response("支付失败，请稍后再试（3）")
 
+    subscribed = request.form.get("subscribed", "False")
+    subscribed = subscribed == "true"
+
     notify_url = build_url("/api/order/callback")
     data = {
         "appid": app.config["MINA_APP_ID"],
@@ -122,11 +125,15 @@ def order_pay():
     prepay_info = wc_utils.get_pay_info(data)
     # save prepay_id to database
     pay_order_info.prepay_id = prepay_info["prepay_id"]
+    pay_order_info.subscribed = subscribed
     db.session.add(pay_order_info)
     db.session.commit()
 
     res_data = {"prepay_info":prepay_info}
+
     if app.config["DEV_MODE"]:
+        # prepare callback xml message right here, send to frontend, and then
+        # frontend will send it back to backend's /order/callback_dev
         res_data["dev_mode"] = True
         cb_dev_data = {
             "appid": data["appid"],

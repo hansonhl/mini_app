@@ -5,8 +5,8 @@ import argparse,sys,traceback
 
 
 '''
-python manage.py runjob -m Test  (  jobs/tasks/Test.py )
-python manage.py runjob -m test/Index (  jobs/tasks/test/Index.py )
+python manage.py run -m Test  (  jobs/tasks/Test.py )
+python manage.py run -m test/Index (  jobs/tasks/test/Index.py )
 * name or flags - 名称或选项字符串列表, e.g. foo or -f, --foo.
 * action - 参数如果定义了选项，表示这是一个操作参数，至于调用时做哪种操作由用户输入或者default决定。
 * nargs - 应该使用的命令行参数数。.

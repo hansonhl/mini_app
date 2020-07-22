@@ -1,8 +1,9 @@
-from application import app
+from application import app, db
 import xml.etree.ElementTree as ET
-import hashlib, requests, uuid, time
+import hashlib, requests, uuid, time, datetime, json
 
-from common.libs.utils import json_response, json_error_response, get_current_time
+from common.libs.utils import  get_current_time
+from common.models.oauth_access_token import OauthAccessToken
 
 def get_pay_info(pay_data=None):
     """ Goal: obtain `prepay_id` from WeChat official api.
@@ -64,3 +65,32 @@ def xml_to_dict(xml):
 def get_nonce_str():
     """ Basically get a random string """
     return str(uuid.uuid4()).replace("-", "")
+
+def get_access_token():
+    token_info = OauthAccessToken.query.filter(OauthAccessToken.expired_time > get_current_time()).first()
+    if token_info:
+        return token_info.access_token
+
+    appid = app.config["MINA_APP_ID"]
+    appsecret = app.config["MINA_APP_SECRET"]
+    url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s" \
+        % (appid, appsecret)
+
+    r = requests.get(url=url)
+
+    if r.status_code != 200 or not r.text:
+        app.logger.error("获取access_token失败！")
+        return None
+
+    data = json.loads(r.text)
+    now = datetime.datetime.now()
+    expired_date = now + datetime.timedelta(seconds=data["expires_in"])
+    token_info = OauthAccessToken()
+    token_info.access_token = data["access_token"]
+    token_info.expired_time = expired_date.strftime("%Y-%m-%d %H:%M:%S")
+    token_info.created_time = now.strftime("%Y-%m-%d %H:%M:%S")
+
+    db.session.add(token_info)
+    db.session.commit()
+
+    return data

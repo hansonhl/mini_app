@@ -1,6 +1,5 @@
 # coding: utf-8
 from application import app, db
-
 class PayOrder(db.Model):
     __tablename__ = 'pay_order'
     __table_args__ = (
@@ -11,8 +10,8 @@ class PayOrder(db.Model):
     order_sn = db.Column(db.String(40), nullable=False, unique=True, server_default=db.FetchedValue(), info='?????')
     member_id = db.Column(db.BigInteger, nullable=False, server_default=db.FetchedValue(), info='??id')
     total_price = db.Column(db.Numeric(10, 2), nullable=False, server_default=db.FetchedValue(), info='??????')
-    deliver_price = db.Column(db.Numeric(10, 2), nullable=False, server_default=db.FetchedValue(), info='????')
-    pay_price = db.Column(db.Numeric(10, 2), nullable=False, server_default=db.FetchedValue(), info='??????')
+    shipping_price = db.Column(db.Numeric(10, 2), nullable=False, server_default=db.FetchedValue(), info='????')
+    base_price = db.Column(db.Numeric(10, 2), nullable=False, server_default=db.FetchedValue(), info='??????')
     pay_sn = db.Column(db.String(128), nullable=False, server_default=db.FetchedValue(), info='??????')
     prepay_id = db.Column(db.String(128), nullable=False, server_default=db.FetchedValue(), info='?????id')
     note = db.Column(db.Text, nullable=False, info='????')
@@ -21,6 +20,7 @@ class PayOrder(db.Model):
     deliver_address_id = db.Column(db.Integer, nullable=False, server_default=db.FetchedValue(), info='????id')
     deliver_info = db.Column(db.String(1000), nullable=False, server_default=db.FetchedValue(), info='????')
     comment_status = db.Column(db.Integer, nullable=False, server_default=db.FetchedValue(), info='????')
+    subscribed = db.Column(db.Integer, nullable=False, server_default=db.FetchedValue(), info='????????')
     pay_time = db.Column(db.DateTime, nullable=False, server_default=db.FetchedValue(), info='??????')
     updated_time = db.Column(db.DateTime, nullable=False, server_default=db.FetchedValue(), info='????????')
     created_time = db.Column(db.DateTime, nullable=False, server_default=db.FetchedValue(), info='????')
@@ -43,4 +43,5 @@ class PayOrder(db.Model):
     @property
     def order_number(self):
         # zfill() fills in zeros on the left size to 5 digits.
-        return self.created_time.strftime("%Y%m%d%H%M%S") + str(self.id).zfill(5)
+        return self.created_time.strftime("%Y%m%d%H%M%S") + str(self.id).zfill(
+            5)

@@ -128,10 +128,11 @@ def order_success(pay_order_id=0, pay_sn=""):
         return False
 
     # add item to queue to notify that the payment has succeeded
-    queue_utils.push("pay", {
-        "member_id": pay_order_info.member_id,
-        "pay_order_id": pay_order_info.id
-    })
+    if pay_order_info.subscribed:
+        queue_utils.push("pay", {
+            "member_id": pay_order_info.member_id,
+            "pay_order_id": pay_order_info.id
+        })
 
     return True
 
