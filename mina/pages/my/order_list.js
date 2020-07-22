@@ -55,26 +55,54 @@ Page({
     },
     toPay: function (e) {
         var that = this;
-        var template_ids = ["7--0oU7_LN9YjbGFUmRnLDpfikYeC09tpcVnRPffZHY"];
+        var template_id = "7--0oU7_LN9YjbGFUmRnLDpfikYeC09tpcVnRPffZHY";
         var data = {
             order_sn: e.currentTarget.dataset.ordersn,
             subscribed: false
         }
-        // request user's permission to allow subscribe messages
-        wx.requestSubscribeMessage({
-            tmplIds: template_ids,
-            success: function (res) {
-                for (var id of template_ids) {
-                    if (res.hasOwnProperty(id) && res[id] == "accept") {
-                        data.subscribed = true;
+        this.initatePay(template_id, data)
+    },
+    initatePay: function (template_id, data) {
+        // first check if user has saved subscription settings locally
+        wx.getSetting({
+            withSubscriptions: true,
+            success: function(res) {
+                var subSetting = res.subscriptionsSetting;
+                var askForPermission = true;
+                if (subSetting.hasOwnProperty(itemSettings)) {
+                    var itemSettings = subSetting.itemSettings;
+                    if (itemSettings.hasOwnProperty(template_id)) {
+                       askForPermission = false;
+                       if (itemSettings[template_id] == "accept") {
+                           data.subscribed = true;
+                       }
                     }
                 }
-                that.doPay(data);
-            },
-            fail: function (res) {
-                that.doPay(data);
+                // TODO: deal with case when `res.subscriptionsSetting.mainSwitch == false`
+
+                if (askForPermission) {
+                    // user did not save subscription settings locally for this message,
+                    // ask for permission (a window will pop up in miniapp)
+                    wx.requestSubscribeMessage({
+                        tmplIds: template_ids,
+                        success: function (res) {
+                            if (res.hasOwnProperty(template_id)
+                                && res[template_id] == "accept") {
+                                data.subscribed = true;
+                            }
+                            that.doPay(data);
+                        },
+                        fail: function (res) {
+                            that.doPay(data);
+                        }
+                    });
+                } else {
+                    // user already saved subscription settings. no need to ask again
+                    that.doPay(data);
+                }
             }
-        })
+        });
+
     },
     doPay: function (data) {
         var that = this;
