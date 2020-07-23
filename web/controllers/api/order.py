@@ -6,6 +6,7 @@ from web.controllers.api import api_blueprint
 from common.libs.utils import json_response, json_error_response, get_current_time, get_int
 from common.libs.url_utils import build_image_url, build_url
 from common.libs.cart_utils import delete_cart_info
+
 import common.libs.pay_utils as pay_utils
 import common.libs.wechat_utils as wc_utils
 
@@ -279,8 +280,12 @@ def order_ops():
     if pay_order_info is None:
         return json_error_response("订单操作失败（3）")
 
-    if action == "delete":
-        pass
+    if action == "cancel":
+         if pay_utils.close_order(pay_order_id=pay_order_info.id):
+             return json_response("取消订单成功")
+         else:
+             return json_error_response("订单操作失败（4）")
+
     elif action == "confirm":
         pay_order_info.deliver_status = 1
         pay_order_info.updated_time = get_current_time()
@@ -289,4 +294,6 @@ def order_ops():
         return json_response("确认收货成功")
     elif action == "comment":
         pass
+    else:
+        return json_response("订单操作失败（5）")
 

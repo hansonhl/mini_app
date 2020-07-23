@@ -162,5 +162,26 @@ def generate_order_sn():
             return sn
 
 def close_order(pay_order_id):
+    pay_order_info = PayOrder.query.filter_by(id=pay_order_id, status=-8).first()
+    if not pay_order_info:
+        return False
 
-    return False
+    # revert stock for items in this order
+    pay_order_items = PayOrderItem.query.filter_by(pay_order_id=pay_order_id).all()
+    if pay_order_items:
+        for item in pay_order_items:
+            food_info = Food.query.filter_by(id=item.food_id).first()
+            if food_info:
+                set_food_stock_change_log(item.food_id, food_info.stock,
+                                          item.quantity,
+                                          note="取消订单，归还库存")
+                food_info.stock += item.quantity
+                food_info.updated_time = get_current_time()
+                db.session.add(food_info)
+                db.session.commit()
+
+    pay_order_info.status = 0
+    pay_order_info.updated_time = get_current_time()
+    db.session.add(pay_order_info)
+    db.session.commit()
+    return True
