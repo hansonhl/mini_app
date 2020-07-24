@@ -1,4 +1,5 @@
 import datetime, math
+from application import app
 from flask import render_template, jsonify, make_response, g
 
 def get_current_time(fmt="%Y-%m-%d %H:%M:%S"):
@@ -66,3 +67,15 @@ def get_int(dict, key, default=None):
     except ValueError:
         return default
     return res
+
+class require_login:
+    def __init__(self, f):
+        self._f = f
+        self.__name__ = f.__name__
+
+    def __call__(self, *args, **kwargs):
+        if g.current_member is None:
+            return json_error_response("您没有登录，无法完成该操作")
+        if g.current_member.status != 1:
+            return json_error_response("该账户已被注销，无法完成该操作")
+        return self._f(*args, **kwargs)

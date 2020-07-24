@@ -3,7 +3,8 @@ from decimal import Decimal
 import json
 
 from web.controllers.api import api_blueprint
-from common.libs.utils import json_response, json_error_response, get_current_time, get_int
+from common.libs.utils import json_response, json_error_response, \
+    get_current_time, require_login
 from common.libs.url_utils import build_image_url, build_url
 from common.libs.cart_utils import delete_cart_info
 
@@ -17,6 +18,7 @@ from common.models.oauth_member_bind import OauthMemberBind
 from application import app, db
 
 @api_blueprint.route("/order/info", methods=["POST"])
+@require_login
 def order_info():
     purchase_list = request.form.get("purchaseList", None)
     if purchase_list is None:
@@ -58,11 +60,8 @@ def order_info():
     return json_response(data=data)
 
 @api_blueprint.route("/order/create", methods=["POST"])
+@require_login
 def order_create():
-    if g.current_member is None:
-        return json_error_response("请先登录再提交订单")
-    if g.current_member.status != 1:
-        return json_error_response("该账户已被注销，无法提交订单")
     member_id = g.current_member.id
 
     order_type = request.form.get("type", None)
@@ -88,11 +87,8 @@ def order_create():
     return make_response(jsonify(res))
 
 @api_blueprint.route("/order/pay", methods=["POST"])
+@require_login
 def order_pay():
-    if g.current_member is None:
-        return json_error_response("请先登录再完成支付")
-    if g.current_member.status != 1:
-        return json_error_response("该账户已被注销，无法完成支付")
     member_info = g.current_member
 
     order_sn = request.form.get("order_sn", None)
@@ -164,6 +160,7 @@ def order_pay():
 
 
 @api_blueprint.route("/order/callback", methods=["POST"])
+@require_login
 def order_callback():
     """ 支付结果通知
     <xml>
@@ -259,13 +256,9 @@ def order_callback_dev():
 
     return json_response("【开发模式】付款成功，信息已录入数据库")
 
-
 @api_blueprint.route("/order/ops", methods=["POST"])
+@require_login
 def order_ops():
-    if g.current_member is None:
-        return json_error_response("请先登录再完成支付")
-    if g.current_member.status != 1:
-        return json_error_response("该账户已被注销，无法完成支付")
     member_info = g.current_member
 
     order_sn = request.form.get("order_sn", None)

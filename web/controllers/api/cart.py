@@ -3,7 +3,7 @@ from decimal import Decimal
 import json
 
 from web.controllers.api import api_blueprint
-from common.libs.utils import json_response, json_error_response, get_current_time, get_int
+from common.libs.utils import json_response, json_error_response, get_int, require_login
 from common.libs.url_utils import build_image_url
 from common.libs.cart_utils import set_cart_info, delete_cart_info
 
@@ -14,11 +14,8 @@ from common.models.food import Food
 from application import app, db
 
 @api_blueprint.route("/cart/set", methods=["POST"])
+@require_login
 def cart_set():
-    if g.current_member is None:
-        return json_error_response("请先登录再添加菜品至购物车")
-    if g.current_member.status != 1:
-        return json_error_response("该账户已被注销，无法添加菜品至购物车")
     member_id = g.current_member.id
 
     food_id = get_int(request.form, "food_id", 0)

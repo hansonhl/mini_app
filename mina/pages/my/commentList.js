@@ -16,9 +16,33 @@ Page({
     },
     onLoad: function (options) {
         // 生命周期函数--监听页面加载
-
+        this.getCommentList();
     },
     onShow: function () {
         var that = this;
+    },
+    getCommentList: function () {
+        var that = this;
+        wx.request({
+            url: app.buildUrl("/my/comment/list"),
+            header: app.getRequestHeader(),
+            method: "GET",
+            success: function (res) {
+                var data = res.data.data;
+                if (res.data.code != 200) {
+                    app.alert({"content": resp.msg});
+                    return;
+                } else {
+                    that.setData({
+                        list: data.list
+                    });
+                }
+                /*
+                that.setData({
+                   user_info:resp.data.info
+                });
+                */
+            }
+        });
     }
 });

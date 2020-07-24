@@ -64,6 +64,7 @@ Page({
     },
     initatePay: function (template_id, data) {
         // first check if user has saved subscription settings locally
+        var that = this;
         wx.getSetting({
             withSubscriptions: true,
             success: function (res) {
@@ -84,7 +85,7 @@ Page({
                     // user did not save subscription settings locally for this message,
                     // ask for permission (a window will pop up in miniapp)
                     wx.requestSubscribeMessage({
-                        tmplIds: template_ids,
+                        tmplIds: [template_id],
                         success: function (res) {
                             if (res.hasOwnProperty(template_id)
                                 && res[template_id] == "accept") {
@@ -169,7 +170,9 @@ Page({
         this.orderOps(e.currentTarget.dataset.ordersn, "confirm", "确认收到货了吗？");
     },
     orderComment: function (e) {
-        this.orderOps(e.currentTarget.dataset.ordersn, "comment", null);
+        wx.navigateTo({
+            url: "/pages/my/comment?order_sn=" + e.currentTarget.dataset.ordersn
+        });
     },
     orderOps: function (order_sn, action, msg) {
         var that = this;
