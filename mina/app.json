@@ -1,6 +1,6 @@
 {
   "pages": [
-    "pages/my/commentList",
+
     "pages/index/index",
 
     "pages/cart/index",
@@ -13,7 +13,7 @@
     "pages/my/order_info",
     "pages/my/order_list",
     "pages/my/comment",
-
+    "pages/my/commentList",
     "pages/my/addressList",
     "pages/my/addressSet"
 

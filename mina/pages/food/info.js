@@ -24,10 +24,10 @@ Page({
     onLoad: function (e) {
         var that = this;
         that.setData({id: e.id}); // e directly contains html GET style arguments
-        this.getFoodInfo();
     },
     onShow: function () {
         this.getFoodInfo();
+        this.getComments();
     },
     getFoodInfo: function () {
         var that = this;
@@ -35,7 +35,7 @@ Page({
             url: app.buildUrl('/food/info?id=' + this.data.id),
             method: 'GET',
             header: app.getRequestHeader(),
-  
+
             success: function (res) {
                 if (res.data.code != 200) {
                     app.alert({"content": res.data.msg});
@@ -53,7 +53,27 @@ Page({
                 }
             }
         });
-       
+
+    },
+    getComments: function () {
+      var that = this;
+      wx.request({
+            url: app.buildUrl('/food/comment?id=' + this.data.id),
+            method: 'GET',
+            header: app.getRequestHeader(),
+
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content": res.data.msg});
+                    return;
+                } else {
+                    that.setData({
+                        commentList: res.data.data.list,
+                        commentCount: res.data.data.list.length
+                    })
+                }
+            }
+        });
     },
     goShopCar: function () {
         wx.reLaunch({
@@ -83,7 +103,7 @@ Page({
             method: 'POST',
             data: data,
             header: app.getRequestHeader(),
-  
+
             success: function (res) {
                 app.alert({"content": res.data.msg});
                 that.setData({hideShopPopup: true, shopCarNum: data.quantity});
@@ -155,7 +175,7 @@ Page({
     onShareAppMessage: function () {
         var that = this;
         return {
-            title: that.data.info.name, 
+            title: that.data.info.name,
             path: app.buildUrl("/food/info?id=" + that.data.info.id),
             /*
             success: function () {
@@ -175,8 +195,9 @@ Page({
             fail: function () {
                 //转发失败
             }
-            */ 
+            */
            // success and fail are no longer supported
         }
     }
+
 });

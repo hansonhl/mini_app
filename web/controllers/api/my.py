@@ -126,7 +126,8 @@ def my_comment_list():
     member_id = g.current_member.id
 
     comment_order_list = db.session.query(MemberComment, PayOrder)\
-        .filter(MemberComment.pay_order_id == PayOrder.id).all()
+        .filter(MemberComment.pay_order_id == PayOrder.id,
+                MemberComment.member_id == member_id).all()
     res_list = [{
         "date": str(comment.created_time),
         "order_number": pay_order.order_number,

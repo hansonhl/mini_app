@@ -7,12 +7,14 @@ from common.libs.utils import json_response, json_error_response, get_current_ti
 from common.libs.url_utils import build_image_url
 from common.libs.cart_utils import get_cart_quantity
 
-from common.models.member import Member
 from common.models.food import Food
 from common.models.food_cat import FoodCat
+from common.models.member import Member
+from common.models.member_comments import MemberComment
 
 
-from application import app
+
+from application import app, db
 
 @api_blueprint.route("/food/index")
 def food_index():
@@ -99,3 +101,22 @@ def food_info():
                 "cart_quantity": get_cart_quantity(member_id, food_id)
             }
     return json_response(data={"info": info})
+
+@api_blueprint.route("/food/comment")
+def comment():
+    id = get_int(request.args, "id", 0)
+    if id == 0:
+        return json_error_response("无法获取评价信息（1）")
+
+    comment_member_list = db.session.query(MemberComment, Member)\
+        .filter(MemberComment.member_id == Member.id,
+                MemberComment.food_ids.ilike("%_{0}_%".format(id))).all()
+
+    res_list = [{
+        "date": str(comment.created_time),
+        "user_avatar_url": member.avatar,
+        "content": comment.content,
+        "score": comment.score_desc
+    } for comment, member in comment_member_list]
+
+    return json_response(data={"list":res_list})
