@@ -1,9 +1,9 @@
 {
   "pages": [
-
+    "pages/cart/index",
     "pages/index/index",
 
-    "pages/cart/index",
+
 
     "pages/food/index",
     "pages/food/info",

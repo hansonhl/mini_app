@@ -30,6 +30,8 @@ FOOD_CAT_ITEMS_PER_PAGE = 30
 FOOD_INDEX_ITEMS_PER_PAGE = 30
 APP_FOOD_INDEX_ITEMS_PER_PAGE = 4
 
+PAY_WAIT_TIME = 30 # (minutes) allowed time duration between user creates order and pays for it
+
 ACCOUNT_STATUS_MAPPING = {
     "1": "正常",
     "0": "已删除"

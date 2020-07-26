@@ -8,7 +8,8 @@ Page({
         deliver_price: "0.00",
         pay_price: "0.00",
         total_price: "0.00",
-        params: null
+        params: null,
+        address_id: 0
     },
     onShow: function () {
         var that = this;
@@ -25,8 +26,13 @@ Page({
         var that = this;
         var data = {
             type: this.data.params.type,
-            purchaseList: JSON.stringify(this.data.params.purchaseList)
+            purchaseList: JSON.stringify(this.data.params.purchaseList),
+            address_id: this.data.address_id,
+            deliver_price: this.data.deliver_price,
+            note: e.detail.value.note
         };
+
+        // TODO: 订单备注功能
 
         wx.request({
             url: app.buildUrl('/order/create'),
@@ -82,6 +88,12 @@ Page({
                         pay_price: data.pay_price,
                         total_price: data.total_price
                     });
+
+                    if (data.default_address) {
+                        that.setData({
+                           address_id: data.default_address.id
+                        });
+                    }
                 }
             }
         });

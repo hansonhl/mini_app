@@ -4,7 +4,7 @@ import json
 
 from web.controllers.api import api_blueprint
 from common.libs.utils import json_response, json_error_response, \
-    get_current_time, require_login
+    get_current_time, require_login, get_int
 from common.libs.url_utils import build_image_url, build_url
 from common.libs.cart_utils import delete_cart_info
 
@@ -14,12 +14,16 @@ import common.libs.wechat_utils as wc_utils
 from common.models.food import Food
 from common.models.pay_order import PayOrder
 from common.models.oauth_member_bind import OauthMemberBind
+from common.models.member_address import MemberAddress
 
 from application import app, db
+from decimal import Decimal
 
 @api_blueprint.route("/order/info", methods=["POST"])
 @require_login
 def order_info():
+    member_id = g.current_member.id
+
     purchase_list = request.form.get("purchaseList", None)
     if purchase_list is None:
         return json_error_response("订单内容不能为空！")
@@ -44,11 +48,18 @@ def order_info():
     } for food in food_info_list]
     pay_price = Decimal(sum(food.price * food_id_to_quantity[food.id] for food in food_info_list))
 
-    default_address = {
-        "name": "编程浪子",
-        "mobile": "12345678901",
-        "address": "上海市浦东新区XX"
-    }
+    default_address = {}
+    default_addr_info = MemberAddress.query.filter_by(status=1, is_default=1, member_id=member_id).first()
+    if default_addr_info:
+        default_address = {
+            "id": default_addr_info.id,
+            "name": default_addr_info.contact_name,
+            "mobile": default_addr_info.mobile,
+            "address": "%s%s%s%s" % (default_addr_info.province_str,
+                                     default_addr_info.city_str,
+                                     default_addr_info.district_str,
+                                     default_addr_info.address)
+        }
 
     data = {
         "order_list": order_list,
@@ -66,16 +77,39 @@ def order_create():
 
     order_type = request.form.get("type", None)
     order_list = request.form.get("purchaseList", None)
+    address_id = get_int(request.form, "address_id", 0)
+    deliver_price = Decimal(request.form.get("deliver_price", "0.00"))
+    note = request.form.get("note", "")
+
     if order_type is None:
         return json_error_response("未注明订单类别，无法提交订单")
     if order_list is None:
         return json_error_response("订单内容不能为空，下单失败")
+    if address_id is None:
+        return json_error_response("未填写地址")
 
     order_list = json.loads(order_list)
     if len(order_list) < 1:
         return json_error_response("订单内容不能为空，下单失败")
 
-    params = {}
+    address_info = MemberAddress.query.filter_by(id=address_id).first()
+    if not address_info or address_info.status != 1:
+        return json_error_response("未填写地址，或者地址信息有误")
+
+
+    params = {
+        "shipping_price": deliver_price,
+        "note": note,
+        "deliver_address_id": address_info.id,
+        "deliver_info": {
+            "name": address_info.contact_name,
+            "mobile": address_info.mobile,
+            "address": "%s%s%s%s" % (address_info.province_str,
+                                     address_info.city_str,
+                                     address_info.district_str,
+                                     address_info.address)
+        }
+    }
     res = pay_utils.create_order(member_id, order_list, params=params)
     app.logger.debug("type of res: %s" % type(res))
     app.logger.debug("res error: %s" % str(res))

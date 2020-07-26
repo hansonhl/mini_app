@@ -18,7 +18,7 @@ Page({
         this.initCityData(1);
     },
     //初始化城市数据
-    initCityData:function( level, obj ){
+    initCityData: function (level, obj) {
         if (level == 1) {
             var pinkArray = [];
             for (var i = 0; i < commonCityData.cityData.length; i++) {
@@ -82,6 +82,71 @@ Page({
         wx.navigateBack({});
     },
     bindSave: function (e) {
+        var that = this;
+        var contactName = e.detail.value.contactName;
+        var address = e.detail.value.address;
+        var mobile = e.detail.value.mobile;
+
+        if (contactName == "") {
+            app.tip({content: "请填写联系人姓名"});
+            return;
+        }
+        if (mobile == "") {
+            app.tip({content: "请填写联系人电话号码"});
+            return;
+        }
+
+        if (this.data.selProvince == "请选择") {
+            app.tip({content: "请选择省市地区"});
+            return;
+        }
+
+        if (this.data.selProvince == "请选择") {
+            app.tip({content: "请选择城市"});
+            return;
+        }
+        var provinceId = commonCityData.cityData[this.data.selProvinceIndex].id;
+        var cityId = commonCityData.cityData[this.data.selProvinceIndex].cityList[this.data.selCityIndex].id;
+        var districtId;
+
+        if (this.data.selDistrict == "请选择" || !that.data.SelDistrict) {
+            districtId = 0;
+        } else {
+            districtId = commonCityData.cityData[this.data.selProvinceIndex].cityList[this.data.selCityIndex].districtList[this.data.selDistrictIndex].id;
+        }
+
+        if (address == "") {
+            app.tip({content: "请填写详细地址"});
+            return;
+        }
+
+        var data = {
+            province_id: provinceId,
+            province_str: this.data.selProvince,
+            city_id: cityId,
+            city_str: this.data.selCity,
+            district_id: districtId,
+            district_str: this.data.selDistrict,
+            address: address,
+            mobile: mobile,
+            contact_name: contactName
+        };
+
+        wx.request({
+            url: app.buildUrl('/my/address/set'),
+            method: 'POST',
+            data: data,
+            header: app.getRequestHeader(),
+
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content": res.data.msg});
+                } else {
+                    var data = res.data.data;
+                    wx.navigateBack();
+                }
+            }
+        });
     },
     deleteAddress: function (e) {
 

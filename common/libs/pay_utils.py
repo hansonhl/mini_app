@@ -1,6 +1,6 @@
 from decimal import Decimal
 from application import app, db
-import hashlib, time, random
+import hashlib, time, random, json
 
 from common.libs.utils import get_current_time
 from common.libs.food_utils import set_food_stock_change_log
@@ -22,13 +22,16 @@ def create_order(member_id, items, params=None):
     pay_price = Decimal(sum(item["price"] * item["quantity"]
                             for item in items if item["price"] >= 0))
 
-    if len(food_id_list) <= 0:
+    if len(food_id_list) <= 0 or pay_price <= 0:
         res["msg"] = "订购商品列表为空，或者所有商品的价格都小于等于0元"
         return res
 
-    deliver_price = Decimal(params.get("deliver_price", 0))
+    shipping_price = Decimal(params.get("shipping_price", 0))
+    total_price = pay_price + shipping_price
+
     notes = params.get("note", "")
-    total_price = pay_price + deliver_price
+    deliver_address_id = params.get("deliver_address_id", 0)
+    deliver_info = params.get("deliver_info", {})
 
     # concurrent handling of orders. We use a pessimistic row-level lock, where
     # a lock is held by a thread/process even when they are just querying the value
@@ -41,11 +44,13 @@ def create_order(member_id, items, params=None):
         pay_order.order_sn = generate_order_sn()
         pay_order.member_id = member_id
         pay_order.total_price = total_price
-        pay_order.deliver_price = deliver_price
+        pay_order.shipping_price = shipping_price
         pay_order.pay_price = pay_price
         pay_order.note = notes
         pay_order.status = -8
         pay_order.deliver_status = -8
+        pay_order.deliver_address_id = deliver_address_id
+        pay_order.deliver_info = json.dumps(deliver_info)
         pay_order.updated_time = pay_order.created_time = get_current_time()
         db.session.add(pay_order)
 

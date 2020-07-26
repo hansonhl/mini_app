@@ -1,6 +1,5 @@
 from flask import request, g, jsonify, make_response
-from decimal import Decimal
-import json
+import datetime, json
 
 from web.controllers.api import api_blueprint
 from common.libs.utils import json_response, json_error_response, \
@@ -11,6 +10,7 @@ from common.models.food import Food
 from common.models.pay_order import PayOrder
 from common.models.pay_order_item import PayOrderItem
 from common.models.member_comments import MemberComment
+from common.models.member_address import MemberAddress
 
 from application import app, db
 
@@ -42,6 +42,7 @@ def my_order():
     else:
         return json_error_response("查询订单信息失败，订单状态有误")
 
+    # TODO: use table join method to retrieve data
     pay_order_list = pay_order_query.order_by(PayOrder.id.desc()).all()
     pay_order_data_list = []
     if pay_order_list:
@@ -79,6 +80,47 @@ def my_order():
     data = {"pay_order_list": pay_order_data_list}
     return json_response(data=data)
 
+@api_blueprint.route("/my/order/info", methods=["GET"])
+@require_login
+def my_order_info():
+    order_sn = request.values.get("order_sn", "")
+    if not order_sn:
+        return json_error_response("查询订单信息错误，请稍后再试（1）")
+
+    pay_order_info = PayOrder.query.filter_by(order_sn=order_sn).first()
+    if not pay_order_info:
+        return json_error_response("查询订单信息错误，请稍后再试（2）")
+
+    pay_wait_time = app.config["PAY_WAIT_TIME"]
+    deadline = pay_order_info.created_time + datetime.timedelta(minutes=pay_wait_time)
+    address_info = json.loads(pay_order_info.deliver_info)
+    data = {
+        "order_sn": pay_order_info.order_sn,
+        "status": pay_order_info.pay_status,
+        "status_desc": pay_order_info.pay_status_desc,
+        "deadline": deadline.strftime("%Y-%m-%d %H:%M"),
+        "address": address_info,
+        "base_price": str(pay_order_info.base_price),
+        "shipping_price": str(pay_order_info.shipping_price),
+        "total_price": str(pay_order_info.total_price),
+    }
+
+    # "poi" short for "PayOrderItem"
+    poi_and_food_list = db.session.query(PayOrderItem, Food).filter(
+        PayOrderItem.pay_order_id == pay_order_info.id,
+        PayOrderItem.food_id == Food.id
+    )
+
+    goods = [{
+        "pic_url": build_image_url(food.main_image),
+        "name": food.name,
+        "price": str(poi.price),
+        "unit": poi.quantity
+    } for poi, food in poi_and_food_list]
+
+    data["goods"] = goods
+
+    return json_response(data=data)
 
 @api_blueprint.route("/my/comment/add", methods=["POST"])
 @require_login
@@ -135,3 +177,50 @@ def my_comment_list():
     } for comment, pay_order in comment_order_list]
 
     return json_response(data={"list": res_list})
+
+@api_blueprint.route("/my/address/set", methods=["POST"])
+@require_login
+def my_address_set():
+    member_id = g.current_member.id
+
+    contact_name = request.form.get("contact_name", "")
+    mobile = request.form.get("mobile", "")
+    address = request.form.get("address", "")
+
+    province_id = get_int(request.form, "province_id", 0)
+    city_id = get_int(request.form, "city_id", 0)
+    district_id = get_int(request.form, "district_id", 0)
+
+    province_str = request.form.get("province_str", "")
+    city_str = request.form.get("city_str", "")
+    district_str = request.form.get("district_str", "")
+
+    empty_items = []
+    for var, item in zip([contact_name, mobile, address, province_str, city_str, province_id, city_id],
+                         ["联系人姓名", "手机号码", "详细地址", "省份名称", "城市名称", "省份代码", "城市代码"]):
+        if not var:
+            empty_items.append(item)
+    if len(empty_items) > 0:
+        return json_error_response("设置地址时以下内容不能为空：" + "、".join(empty_items))
+
+    default_addr_cnt = MemberAddress.query.filter_by(is_default=1, member_id=member_id,
+                                                       status=1).count()
+
+    addr_info = MemberAddress()
+    addr_info.member_id = member_id
+    addr_info.is_default = 1 if default_addr_cnt == 0 else 0
+    addr_info.contact_name = contact_name
+    addr_info.mobile = mobile
+    addr_info.province_id = province_id
+    addr_info.province_str = province_str
+    addr_info.city_id = city_id
+    addr_info.city_str = city_str
+    addr_info.district_id = district_id
+    addr_info.district_str = district_str
+    addr_info.address = address
+    addr_info.created_time = addr_info.updated_time = get_current_time()
+
+    db.session.add(addr_info)
+    db.session.commit()
+
+    return json_response("操作成功")

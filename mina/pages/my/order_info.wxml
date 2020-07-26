@@ -1,4 +1,5 @@
 <view class="container">
+
     <view class="sec-wrap">
         <view class="order-status">
             <view class="icon-box">
@@ -46,18 +47,18 @@
                     </view>
                 </view>
             </block>
-        <view class="btn-row">
+        <view class="btn-row" wx:if="{{info.status==-6}}">
               <button class="confirm-btn" data-id="{{info.order_sn}}">确认收货</button>
         </view>
     </view>
     <view class="goods-info">
         <view class="row-box">
             <view class="row-label">商品金额</view>
-            <view class="right-text">¥ {{info.pay_price}}</view>
+            <view class="right-text">¥ {{info.base_price}}</view>
         </view>
         <view class="row-box">
             <view class="row-label">运费</view>
-            <view class="right-text">+ ¥ {{info.deliver_price}}</view>
+            <view class="right-text">+ ¥ {{info.shipping_price}}</view>
         </view>
         <view class="row-box">
             <view class="row-label">应付总额</view>
