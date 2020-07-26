@@ -9,28 +9,35 @@ Page({
         wx.navigateBack({});
     },
     addessSet: function (e) {
+        var url = "/pages/my/addressSet";
+        if (e.currentTarget.dataset.hasOwnProperty("id")) {
+            url += "?id=" + e.currentTarget.dataset.id;
+        }
         wx.navigateTo({
-            url: "/pages/my/addressSet"
+            url: url
         })
     },
     onShow: function () {
+        this.getAddressList();
+    },
+    getAddressList: function () {
         var that = this;
-        that.setData({
-            addressList: [
-                {
-                    id:1,
-                    name: "编程浪子",
-                    mobile: "12345678901",
-                    detail: "上海市浦东新区XX",
-                    isDefault: 1
-                },
-                {
-                    id: 2,
-                    name: "编程浪子888",
-                    mobile: "12345678901",
-                    detail: "上海市浦东新区XX"
+        wx.request({
+            url: app.buildUrl('/my/address/list'),
+            method: 'GET',
+            data: {},
+            header: app.getRequestHeader(),
+
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content": res.data.msg});
+                } else {
+                    var data = res.data.data;
+                    that.setData({
+                        addressList: data.address_list
+                    });
                 }
-            ]
+            }
         });
     }
 });

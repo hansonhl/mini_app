@@ -178,6 +178,25 @@ def my_comment_list():
 
     return json_response(data={"list": res_list})
 
+
+@api_blueprint.route("/my/address/get", methods=["GET"])
+@require_login
+def my_address_get():
+    address_id = get_int(request.values, "id", 0)
+    address_info = MemberAddress.query.filter_by(id=address_id)
+    if not address_info:
+        return json_error_response("无法获取地址信息")
+    data = {
+        "contact_name": address_info.contact_name,
+        "mobile": address_info.mobile,
+        "province_id": address_info.province_id,
+        "city_id": address_info.city_id,
+        "district_id": address_info.district_id,
+        "address": address_info.address
+    }
+    return json_response(data=data)
+
+
 @api_blueprint.route("/my/address/set", methods=["POST"])
 @require_login
 def my_address_set():
@@ -224,3 +243,19 @@ def my_address_set():
     db.session.commit()
 
     return json_response("操作成功")
+
+@api_blueprint.route("/my/address/list", methods=["GET"])
+@require_login
+def my_address_list():
+    member_id = g.current_member.id
+    address_info = MemberAddress.query.filter_by(member_id=member_id, status=1)
+    address_list = [{
+        "id": addr.id,
+        "isDefault": addr.is_default == 1,
+        "name": addr.contact_name,
+        "mobile": addr.mobile,
+        "address": "%s%s%s%s" % (addr.province_str, addr.city_str,
+                                 addr.district_str, addr.address)
+    } for addr in address_info]
+    data = {"address_list": address_list}
+    return json_response(data=data)

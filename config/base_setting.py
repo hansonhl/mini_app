@@ -1,3 +1,5 @@
+import json
+
 DEBUG = False
 SERVER_PORT = 5000
 
@@ -45,7 +47,6 @@ IMG_UPLOAD_CONFIGS = {
 
 DOMAIN = "http://192.168.1.171:5000"
 
-
 PAY_STATUS_MAPPING = {
     "0": "订单已关闭",
     "1": "支付成功",
@@ -54,3 +55,9 @@ PAY_STATUS_MAPPING = {
     "-6": "待确认",
     "-5": "待评价"
 }
+
+with open("city_data.json", "r") as f:
+    addr_info = json.load(f)
+
+ADDR_INFO = addr_info
+ADDR_ID_TO_IDX_MAP = {}

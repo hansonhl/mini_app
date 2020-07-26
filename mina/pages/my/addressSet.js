@@ -3,6 +3,7 @@ var commonCityData = require('../../utils/city.js');
 var app = getApp();
 Page({
     data: {
+        id: 0,
         provinces: [],
         citys: [],
         districts: [],
@@ -14,8 +15,15 @@ Page({
         selDistrictIndex: 0
     },
     onLoad: function (e) {
-        var that = this;
         this.initCityData(1);
+        if (e.hasOwnProperty("id")) {
+            this.setData({id: e.id});
+        }
+    },
+    onShow: function () {
+        if (this.data.id) {
+            this.getAddrInfo();
+        }
     },
     //初始化城市数据
     initCityData: function (level, obj) {
@@ -144,6 +152,24 @@ Page({
                 } else {
                     var data = res.data.data;
                     wx.navigateBack();
+                }
+            }
+        });
+    },
+    getAddrInfo: function() {
+        var that = this;
+        var data = {id: this.data.id};
+        wx.request({
+            url: app.buildUrl('/my/address/get'),
+            method: 'POST',
+            data: data,
+            header: app.getRequestHeader(),
+
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content": res.data.msg});
+                } else {
+                    var data = res.data.data;
                 }
             }
         });

@@ -7,7 +7,7 @@
                 <image wx:elif="{{info.status==-8}}" class="icon" src="/images/order/icon-ddfk.png"></image>
                 <image wx:elif="{{info.status==-7}}" class="icon" src="/images/order/icon-ddfh.png"></image>
                 <image wx:elif="{{info.status== -6}}" class="icon" src="/images/order/icon-ddsh.png"></image>
-                <image wx:elif="{{info.status== 1 || info.status== -5}}" class="icon" src="/images/order-details/icon-jycg.png"></image>
+                <image wx:elif="{{info.status== 1 || info.status== -5}}" class="icon" src="/images/order/icon-jycg.png"></image>
             </view>
             <view class="right-text">
                 <view class="status red">{{info.status_desc}}</view>
