@@ -1,17 +1,28 @@
 //获取应用实例
 var app = getApp();
 Page({
-    data: {},
+    data: {user_info: null},
     onLoad() {
 
     },
     onShow() {
-        let that = this;
-        that.setData({
-            user_info: {
-                nickname: "编程浪子",
-                avatar_url: "/images/more/logo.png"
-            },
-        })
+        this.getMemberInfo();
+    },
+    getMemberInfo() {
+        var that = this;
+        wx.request({
+            url: app.buildUrl('/my/index'),
+            method: 'GET',
+            header: app.getRequestHeader(),
+
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content": res.data.msg});
+                } else {
+                    var data = res.data.data;
+                    that.setData({user_info: data.user_info});
+                }
+            }
+        });
     }
 });

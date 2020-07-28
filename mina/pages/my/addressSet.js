@@ -158,7 +158,7 @@ Page({
             }
         });
     },
-    getAddrInfo: function() {
+    getAddrInfo() {
         var that = this;
         var data = {id: this.data.id};
         wx.request({

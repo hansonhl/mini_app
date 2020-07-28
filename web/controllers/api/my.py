@@ -14,6 +14,16 @@ from common.models.member_address import MemberAddress
 
 from application import app, db
 
+@api_blueprint.route("/my/index", methods=["GET"])
+@require_login
+def my_index():
+    data = {"user_info": {
+        "avatar_url": g.current_member.avatar,
+        "nickname": g.current_member.nickname,
+        "mobile": g.current_member.mobile
+    }}
+    return json_response(data=data)
+
 @api_blueprint.route("/my/order", methods=["POST"])
 @require_login
 def my_order():
