@@ -158,7 +158,7 @@ Page({
             }
         });
     },
-    getAddrInfo() {
+    getAddrInfo: function() {
         var that = this;
         var data = {id: this.data.id};
         wx.request({
@@ -188,6 +188,22 @@ Page({
         });
     },
     deleteAddress: function (e) {
+        var id = e.currentTarget.dataset.id;
+        var action = "delete";
+        var that = this;
+        wx.request({
+            url: app.buildUrl('/my/address/ops'),
+            method: 'POST',
+            data: {id: id, action: action},
+            header: app.getRequestHeader(),
 
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content": res.data.msg});
+                } else {
+                    wx.navigateBack();
+                }
+            }
+        });
     },
 });

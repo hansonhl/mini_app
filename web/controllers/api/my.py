@@ -289,3 +289,41 @@ def my_address_list():
     } for addr in address_info]
     data = {"address_list": address_list}
     return json_response(data=data)
+
+@api_blueprint.route("/my/address/ops", methods=["POST"])
+@require_login
+def my_address_ops():
+    addr_id = utils.get_int(request.form, "id", 0)
+    action = request.form.get("action", "")
+
+    addr_info = MemberAddress.query.filter_by(id=addr_id).first()
+    if not addr_info:
+        return json_error_response("地址更改操作错误（1）")
+
+    if action == "set_default":
+        member_id = g.current_member.id
+        current_time = utils.get_current_time()
+        MemberAddress.query.filter_by(member_id=member_id) \
+            .update({"is_default": 0, "updated_time": current_time})
+
+        addr_info.is_default = 1
+        addr_info.updated_time = utils.get_current_time()
+        db.session.add(addr_info)
+        db.session.commit()
+
+        return json_response()
+    elif action == "delete":
+        addr_info.status = 0
+        addr_info.updated_time = utils.get_current_time()
+        db.session.add(addr_info)
+        db.session.commit()
+
+        latest_addr = MemberAddress.query.filter_by(status=1).order_by(MemberAddress.updated_time.desc()).first()
+        if latest_addr:
+            latest_addr.is_default = 1
+            db.session.add(latest_addr)
+            db.session.commit()
+
+        return json_response()
+    else:
+        return json_error_response("地址更改操作错误（2）")

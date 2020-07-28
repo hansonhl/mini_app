@@ -4,11 +4,28 @@ Page({
     data: {
         addressList: []
     },
-    selectTap: function (e) {
-        //从商品详情下单选择地址之后返回
-        wx.navigateBack({});
+    selectTap (e) {
+        // select an address as default address
+        var id = e.currentTarget.dataset.id;
+        var action = "set_default";
+        var that = this;
+        wx.request({
+            url: app.buildUrl('/my/address/ops'),
+            method: 'POST',
+            data: {id: id, action: action},
+            header: app.getRequestHeader(),
+
+            success: function (res) {
+                if (res.data.code != 200) {
+                    app.alert({"content": res.data.msg});
+                } else {
+                    var data = res.data.data;
+                    that.getAddressList();
+                }
+            }
+        });
     },
-    addessSet: function (e) {
+    addessSet (e) {
         var url = "/pages/my/addressSet";
         if (e.currentTarget.dataset.hasOwnProperty("id")) {
             url += "?id=" + e.currentTarget.dataset.id;
@@ -17,10 +34,10 @@ Page({
             url: url
         })
     },
-    onShow: function () {
+    onShow () {
         this.getAddressList();
     },
-    getAddressList: function () {
+    getAddressList () {
         var that = this;
         wx.request({
             url: app.buildUrl('/my/address/list'),
