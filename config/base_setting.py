@@ -56,8 +56,12 @@ PAY_STATUS_MAPPING = {
     "-5": "待评价"
 }
 
-with open("city_data.json", "r") as f:
+with open("city_info.json", "r") as f:
     addr_info = json.load(f)
 
-ADDR_INFO = addr_info
-ADDR_ID_TO_IDX_MAP = {}
+PROV_ID_TO_IDX_MAP = {province["id"]: i for i, province in enumerate(addr_info)}
+CITY_ID_TO_IDX_MAPS = [{city["id"]: i for i, city in enumerate(province["cityList"])}
+                       for province in addr_info]
+DISTR_ID_TO_IDX_MAPS = [[{district["id"]: i for i, district in enumerate(city["districtList"])}
+                        for city in province["cityList"]]
+                       for province in addr_info]

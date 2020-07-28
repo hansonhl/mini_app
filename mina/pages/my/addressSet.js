@@ -12,7 +12,8 @@ Page({
         selDistrict: '请选择',
         selProvinceIndex: 0,
         selCityIndex: 0,
-        selDistrictIndex: 0
+        selDistrictIndex: 0,
+        address: ''
     },
     onLoad: function (e) {
         this.initCityData(1);
@@ -129,6 +130,7 @@ Page({
         }
 
         var data = {
+            id: this.data.id,
             province_id: provinceId,
             province_str: this.data.selProvince,
             city_id: cityId,
@@ -161,7 +163,7 @@ Page({
         var data = {id: this.data.id};
         wx.request({
             url: app.buildUrl('/my/address/get'),
-            method: 'POST',
+            method: 'GET',
             data: data,
             header: app.getRequestHeader(),
 
@@ -170,6 +172,17 @@ Page({
                     app.alert({"content": res.data.msg});
                 } else {
                     var data = res.data.data;
+                    that.setData({
+                        contactName: data.contact_name,
+                        mobile: data.mobile,
+                        selProvince: data.province_name,
+                        selProvinceIndex: data.province_idx,
+                        selCity: data.city_name,
+                        selCityIndex: data.city_idx,
+                        selDistrict: data.district_name,
+                        selDistrictIndex: data.distr_idx,
+                        address: data.address
+                    });
                 }
             }
         });

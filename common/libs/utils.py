@@ -79,3 +79,17 @@ class require_login:
         if g.current_member.status != 1:
             return json_error_response("该账户已被注销，无法完成该操作")
         return self._f(*args, **kwargs)
+
+def get_addr_idxs(prov_id, city_id, distr_id=0):
+    prov_map = app.config["PROV_ID_TO_IDX_MAP"]
+    city_map = app.config["CITY_ID_TO_IDX_MAPS"]
+    distr_map = app.config["DISTR_ID_TO_IDX_MAPS"]
+
+    prov_idx = prov_map[prov_id]
+    city_idx = city_map[prov_idx][city_id]
+
+    distr_idx = 0
+    if distr_id > 0:
+        distr_idx = distr_map[prov_idx][city_idx][distr_id]
+
+    return prov_idx, city_idx, distr_idx

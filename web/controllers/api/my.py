@@ -2,8 +2,8 @@ from flask import request, g, jsonify, make_response
 import datetime, json
 
 from web.controllers.api import api_blueprint
-from common.libs.utils import json_response, json_error_response, \
-    get_id_to_model_dict, get_int, require_login, get_current_time
+from common.libs.utils import json_response, json_error_response, require_login
+from common.libs import utils
 from common.libs.url_utils import build_image_url
 
 from common.models.food import Food
@@ -19,7 +19,7 @@ from application import app, db
 def my_order():
     member_id = g.current_member.id
 
-    status = get_int(request.form, "status", None)
+    status = utils.get_int(request.form, "status", None)
     if status is None:
         return json_error_response("查询订单信息失败，请注明订单状态")
 
@@ -49,7 +49,7 @@ def my_order():
         pay_order_ids = [pay_order.id for pay_order in pay_order_list]
         pay_order_items_list = PayOrderItem.query.filter(PayOrderItem.pay_order_id.in_(pay_order_ids))
         food_ids = [item.food_id for item in pay_order_items_list]
-        fid_to_info = get_id_to_model_dict(Food, "id", Food.id, food_ids)
+        fid_to_info = utils.get_id_to_model_dict(Food, "id", Food.id, food_ids)
 
         oid_to_items = {}
         for item in pay_order_items_list:
@@ -141,7 +141,7 @@ def my_comment_add():
     pay_order_items = PayOrderItem.query.filter_by(pay_order_id=pay_order_info.id).all()
     food_ids = "_".join(str(item.food_id) for item in pay_order_items)
 
-    score = get_int(request.form, "score", 10)
+    score = utils.get_int(request.form, "score", 10)
     content = request.form.get("content", "")
 
     comment_info = MemberComment()
@@ -150,13 +150,13 @@ def my_comment_add():
     comment_info.pay_order_id = pay_order_info.id
     comment_info.score = score
     comment_info.content = content
-    comment_info.created_time = get_current_time()
+    comment_info.created_time = utils.get_current_time()
 
     db.session.add(comment_info)
     db.session.commit()
 
     pay_order_info.comment_status = 1
-    pay_order_info.updated_time = get_current_time()
+    pay_order_info.updated_time = utils.get_current_time()
     db.session.add(pay_order_info)
     db.session.commit()
 
@@ -182,16 +182,24 @@ def my_comment_list():
 @api_blueprint.route("/my/address/get", methods=["GET"])
 @require_login
 def my_address_get():
-    address_id = get_int(request.values, "id", 0)
-    address_info = MemberAddress.query.filter_by(id=address_id)
+    address_id = utils.get_int(request.values, "id", 0)
+    address_info = MemberAddress.query.filter_by(id=address_id).first()
     if not address_info:
         return json_error_response("无法获取地址信息")
+
+    prov_idx, city_idx, distr_idx = \
+        utils.get_addr_idxs(address_info.province_id, address_info.city_id,
+                            address_info.district_id)
+
     data = {
         "contact_name": address_info.contact_name,
         "mobile": address_info.mobile,
-        "province_id": address_info.province_id,
-        "city_id": address_info.city_id,
-        "district_id": address_info.district_id,
+        "province_name": address_info.province_str,
+        "city_name": address_info.city_str,
+        "district_name": address_info.district_str,
+        "province_idx": prov_idx,
+        "city_idx": city_idx,
+        "distr_idx": distr_idx,
         "address": address_info.address
     }
     return json_response(data=data)
@@ -202,13 +210,14 @@ def my_address_get():
 def my_address_set():
     member_id = g.current_member.id
 
+    addr_id = utils.get_int(request.form, "id", 0)
     contact_name = request.form.get("contact_name", "")
     mobile = request.form.get("mobile", "")
     address = request.form.get("address", "")
 
-    province_id = get_int(request.form, "province_id", 0)
-    city_id = get_int(request.form, "city_id", 0)
-    district_id = get_int(request.form, "district_id", 0)
+    province_id = utils.get_int(request.form, "province_id", 0)
+    city_id = utils.get_int(request.form, "city_id", 0)
+    district_id = utils.get_int(request.form, "district_id", 0)
 
     province_str = request.form.get("province_str", "")
     city_str = request.form.get("city_str", "")
@@ -222,12 +231,23 @@ def my_address_set():
     if len(empty_items) > 0:
         return json_error_response("设置地址时以下内容不能为空：" + "、".join(empty_items))
 
-    default_addr_cnt = MemberAddress.query.filter_by(is_default=1, member_id=member_id,
-                                                       status=1).count()
 
-    addr_info = MemberAddress()
-    addr_info.member_id = member_id
-    addr_info.is_default = 1 if default_addr_cnt == 0 else 0
+
+    # check if addr_info already exists
+    addr_info = MemberAddress.query.filter_by(id=addr_id).first()
+
+    if addr_info:
+        if addr_info.member_id != member_id:
+            return json_error_response("修改地址时出现错误（1）")
+    if not addr_info:
+        default_addr_cnt = MemberAddress.query.filter_by(is_default=1,
+                                                         member_id=member_id,
+                                                         status=1).count()
+        addr_info = MemberAddress()
+        addr_info.member_id = member_id
+        addr_info.is_default = 1 if default_addr_cnt == 0 else 0
+        addr_info.created_time = utils.get_current_time()
+
     addr_info.contact_name = contact_name
     addr_info.mobile = mobile
     addr_info.province_id = province_id
@@ -237,7 +257,7 @@ def my_address_set():
     addr_info.district_id = district_id
     addr_info.district_str = district_str
     addr_info.address = address
-    addr_info.created_time = addr_info.updated_time = get_current_time()
+    addr_info.updated_time = utils.get_current_time()
 
     db.session.add(addr_info)
     db.session.commit()
