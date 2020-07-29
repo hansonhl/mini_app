@@ -61,7 +61,7 @@ Page({
     //加数量
     addBtnTap: function (e) {
         var index = parseInt(e.currentTarget.dataset.index);
-        var list = that.data.list;
+        var list = this.data.list;
         list[index].quantity++;
         this.setCart(list[index].food_id, list[index].quantity);
         this.updatePageData(list);

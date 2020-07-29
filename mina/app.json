@@ -1,6 +1,5 @@
 {
   "pages": [
-    "pages/my/index",
     "pages/index/index",
 
     "pages/cart/index",
@@ -8,6 +7,7 @@
     "pages/food/info",
     "pages/order/index",
 
+    "pages/my/index",
     "pages/my/order_info",
     "pages/my/order_list",
     "pages/my/comment",

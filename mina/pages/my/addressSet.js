@@ -25,6 +25,14 @@ Page({
         if (this.data.id) {
             this.getAddrInfo();
         }
+        if (this.data.selProvinceIndex > 0) {
+            var provItem = commonCityData.cityData[this.data.selProvinceIndex];
+            this.initCityData(2, provItem);
+        }
+        if (this.data.selCityIndex > 0) {
+            var cityItem = commonCityData.cityData[this.data.selProvinceIndex].cityList[this.data.selCityIndex];
+            this.initCityData(3, cityItem);
+        }
     },
     //初始化城市数据
     initCityData: function (level, obj) {
@@ -47,7 +55,7 @@ Page({
             });
         } else if (level == 3) {
             var pinkArray = [];
-            var dataArray = obj.districtList
+            var dataArray = obj.districtList;
             for (var i = 0; i < dataArray.length; i++) {
                 pinkArray.push(dataArray[i].name);
             }
@@ -116,10 +124,13 @@ Page({
         }
         var provinceId = commonCityData.cityData[this.data.selProvinceIndex].id;
         var cityId = commonCityData.cityData[this.data.selProvinceIndex].cityList[this.data.selCityIndex].id;
+
         var districtId;
+        var districtStr = this.data.selDistrict;
 
         if (this.data.selDistrict == "请选择" || !that.data.SelDistrict) {
             districtId = 0;
+            districtStr = "";
         } else {
             districtId = commonCityData.cityData[this.data.selProvinceIndex].cityList[this.data.selCityIndex].districtList[this.data.selDistrictIndex].id;
         }
@@ -136,7 +147,7 @@ Page({
             city_id: cityId,
             city_str: this.data.selCity,
             district_id: districtId,
-            district_str: this.data.selDistrict,
+            district_str: districtStr,
             address: address,
             mobile: mobile,
             contact_name: contactName

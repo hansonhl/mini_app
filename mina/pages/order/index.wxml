@@ -22,7 +22,7 @@
                 </view>
                 <view class="arow">
                     <view class="goods-label"></view>
-                    <view class="goods-num">x {{item.number}}</view>
+                    <view class="goods-num">x {{item.quantity}}</view>
                 </view>
             </view>
         </view>
