@@ -6,6 +6,14 @@ https://coding.imooc.com/learn/list/265.html
 All static files (`web/static`) and front-end design files for the 
 miniapp (`mina/*`) are provided by the instructor.
 
+## Setup
+
+This project uses python 3.6, and is intended to be run on a linux machine as a server. 
+`setup_process.md` documents the process for setting up the environment to run this web 
+app on a virtual machine that could be accessed from the host machine.
+
+After finishing the setup, install the required python packages in `requirments.txt`.
+
 ## Usage
 
 How to run server in development mode
